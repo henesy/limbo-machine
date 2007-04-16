@@ -1,5 +1,7 @@
 #labels Phase-Deploy
-  * Compile the program:
+How to install and run the system.
+
+  * Compile the sample program:
   ; limbo sample.b
   * ... copy it to the httpd installation root:
   ; cp sample.dis /dis/svc/httpd
