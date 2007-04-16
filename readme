@@ -1,0 +1,11 @@
+Compile this program:
+; limbo sample.b
+... copy it to the httpd installation root:
+; cp sample.dis /dis/svc/httpd
+... run httpd:
+; /dis/svc/httpd/httpd
+... then open a browser on your native OS and go to:
+http://localhost/magic/sample
+
+The first two steps (compile and install) can be automated with:
+; mk install
