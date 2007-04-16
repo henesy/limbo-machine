@@ -1,6 +1,4 @@
 #labels Phase-Deploy
-=Installation=
-
   * Compile the program:
   ; limbo sample.b
   * ... copy it to the httpd installation root:
