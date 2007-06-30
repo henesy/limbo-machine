@@ -27,7 +27,6 @@ Styx.prototype = {
         return null;
     }
 
-    // If a given message is an error: returns ename, otherwise null
     'error': function(msg) {
         var t = getType(msg);
         if (t == MessageType.Rerror)
