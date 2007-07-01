@@ -6,17 +6,17 @@ Connection = function(service) {
     this.service = service;
 }
 
-Connection.prototype = {
-    'tx': function(data) {
-        var req = XMLHttpRequest();
-// netscape.security.PrivilegeManager.enablePrivilege("UniversalBrowserRead");
-        req.open('POST', this.service, false);
-        req.overrideMimeType('text/plain; charset=x-user-defined');
-        req.send(data);
+Connection.prototype.tx = function(data) {
+    var req = new XMLHttpRequest();
+    netscape.security.PrivilegeManager.enablePrivilege(
+            "UniversalBrowserRead");
 
-        if (req.status > 299 || req.status < 200)
-            return '';
+    req.open('POST', this.service, false);
+    req.overrideMimeType('text/plain; charset=x-user-defined');
+    req.send(data);
 
-        return req.responseText;
-    }
+    if (req.status > 299 || req.status < 200)
+        return '';
+
+    return req.responseText;
 }

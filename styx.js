@@ -4,36 +4,34 @@ Styx = function(service, onerror) {
     this.tag = 0;
 }
 
-Styx.prototype = {
-    'createMsg': function(type) {
-        return add16(tag++, [0, 0, 0, 0, type]);
-    }
+Styx.prototype.createMsg = function(type) {
+    return add16(this.tag++, [0, 0, 0, 0, type]);
+}
 
-    'attach': function(fid, user, pass) {
-        var tAttach = createMsg(MType.Tattach);
-        add32(fid, tAttach);
-        add32(~0, tAttach); // TODO: declare NOFID constant
-        addString(user, tAttach);
-        addString(pass, tAttach);
-        adjustSize(tAttach);
+Styx.prototype.attach = function(fid, user, pass) {
+    var tAttach = this.createMsg(MessageType.Tattach);
+    add32(fid, tAttach);
+    add32(~0, tAttach); // TODO: declare NOFID constant
+    addString(user, tAttach);
+    addString(pass, tAttach);
+    adjustSize(tAttach);
 
-        var rAttach = conn.tx(tAttach);
+    var rAttach = this.conn.tx(tAttach);
 
-        var e = error(rAttach);
-        if (e == null)
-            return getQid(rAttach);
+    var e = this.getError(rAttach);
+    if (e == null)
+        return getQid(rAttach);
 
-        this.onerror(e);
-        return null;
-    }
+    this.onerror(e);
+    return null;
+}
 
-    'error': function(msg) {
-        var t = getType(msg);
-        if (t == MessageType.Rerror)
-            return msg.substring(7);
-    
-        return null;
-    }
+Styx.prototype.getError = function(msg) {
+    var t = getType(msg);
+    if (t == MessageType.Rerror)
+        return msg.substring(7);
+
+    return null;
 }
 
 function add16(val, msg) {
