@@ -17,12 +17,7 @@ init(nil: ref Draw->Context, args: list of string)
     sys = load Sys Sys->PATH;
     sys->pctl(Sys->NEWPGRP, nil);
 
-    announce("tcp!*!7777");
-}
-
-announce(addr : string)
-{
-    (ok, conn) := sys->announce(addr);
+    (ok, conn) := sys->announce("tcp!*!7777");
     if (ok < 0)
         raise "cannot announce connection";
 
@@ -38,7 +33,7 @@ process(c : Sys->Connection)
 
     sys->print("incoming connection ...\n");
 
-    machine = load Machine "sample.dis";
+    machine = load Machine "http.dis";
     machine->init();
     fd := sys->open(nc.dir + "/data", sys->ORDWR);
 

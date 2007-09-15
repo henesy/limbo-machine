@@ -21,7 +21,7 @@ clean:
     limbo $flags $src/$stem.b
     mv $stem.dis $stem.sbl $dis
 
-build: clean init server.dis sample.dis
+build: clean init server.dis sample.dis http.dis
     ls $dis
 
 start:

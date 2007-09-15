@@ -18,7 +18,7 @@ Styx.prototype.attach = function(fid, user, pass) {
 
     var rAttach = this.conn.tx(tAttach);
 
-    var e = this.getError(rAttach);
+    var e = this.getError(MessageType.Rattach, rAttach);
     if (e == null)
         return getQid(rAttach);
 
@@ -26,10 +26,12 @@ Styx.prototype.attach = function(fid, user, pass) {
     return null;
 }
 
-Styx.prototype.getError = function(msg) {
-    var t = getType(msg);
+Styx.prototype.getError = function(type, msg) {
+    var t = getType();
     if (t == MessageType.Rerror)
-        return msg.substring(7);
+        return msg.slice(7);
+    if (t != type)
+        return "bad message type, exp: " + type + " was: " + t; 
 
     return null;
 }
@@ -63,16 +65,8 @@ function adjustSize(msg) {
         msg[i] = size[i];
 }
 
-function toBinaryString(data, getch) {
-    var tmp = [];
-    for (var i = 0, len = data.length; i < len; i++)
-        tmp.push(String.fromCharCode(getch(data, i) & 0xFF));
-
-    return tmp.join('');
-}
-
 function getType(msg) {
-    return msg.charCodeAt(5) & 0xFF;
+    return msg[5];
 }
 
 var MessageType = {

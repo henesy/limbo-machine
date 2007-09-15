@@ -5,8 +5,9 @@
 <script type="text/javascript" src="connection.js"></script>
 <script type="text/javascript" src="styx.js"></script>
 <script type="text/javascript">
+var styx = new Styx("http://localhost:7777", onerror);
+
 function test() {
-    var styx = new Styx("http://localhost:7777", onerror);
     styx.attach(1, '', '');
 }
 
@@ -14,9 +15,8 @@ function onerror(msg) {
     alert(msg);
 }
 </script>
-
 </head>
 
-<body onload="">
+<body>
     <input type="button" name="button" value="Test" onclick="test()"/>
 </body>
