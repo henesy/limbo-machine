@@ -27,9 +27,9 @@ Styx.prototype.attach = function(fid, user, pass) {
 }
 
 Styx.prototype.getError = function(type, msg) {
-    var t = getType();
+    var t = getType(msg);
     if (t == MessageType.Rerror)
-        return msg.slice(7);
+        return "error: " + getString(msg, 6, msg.length);
     if (t != type)
         return "bad message type, exp: " + type + " was: " + t; 
 
@@ -57,6 +57,14 @@ function addString(val, msg) {
     add16(val.length, msg);
     for (var i = 0, len = val.length; i < len; i++)
         msg.push(val.charCodeAt(i) & 0xFF);
+}
+
+function getString(data, from, to) {
+    var res = [];
+    for (var i = from; i < to; i++)
+        res.push(String.fromCharCode(data[i] & 0xFF));
+
+    return res.join("");
 }
 
 function adjustSize(msg) {
