@@ -35,8 +35,9 @@ Message.prototype.addString = function(val) {
 Message.prototype.getString = function(idx) {
     var res = [];
     var len = this.get16(idx);
-    for (var i = idx + 2, len = this.get16(idx); i < len; i++)
-        res.push(String.fromCharCode(get8(i)));
+    idx += 2;
+    for (var i = idx, to = idx + len; i < to; i++)
+        res.push(String.fromCharCode(this.get8(i)));
 
     return res.join("");
 }

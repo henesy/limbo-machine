@@ -17,17 +17,17 @@ init()
     sys = load Sys Sys->PATH;
 }
 
+errorAbc := array of byte
+    "HTTP/1.0 200 OK\nContent-Length: 24\n\n0000000c6bffff0003616263";
+
 service(fd : ref Sys->FD)
 {
     sys->print("http connection\n");
 
     # req := request(fd);
     print(fd);
-
-    res := array of byte
-            "HTTP/1.0 200 OK\nContent-Length: 18\n\n00000000006b616263";
     
-    sys->write(fd, res, len res);
+    sys->write(fd, errorAbc, len errorAbc);
 }
 
 print(fd: ref Sys->FD)
