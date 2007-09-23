@@ -21,25 +21,26 @@ var Mode =
 
 // TODO: tag checks and asynch messaging
 Styx = function(service, onerror) {
-    this.conn = new Connection(service);
+    this.conn = new Connection(service, onerror);
     this.onerror = onerror;
     this.tag = 0;
     this.msize = 4096;
-    this.version = "9P2000";
+    this.ver = "9P2000";
+
+    Message.prototype.onerror = onerror;
 }
 
 Styx.prototype.version = function() {
     var tVersion = new Message([], MessageType.Tversion, NOTAG);
     tVersion.add32(this.msize);
-    tVersion.addString(this.version);
+    tVersion.addString(this.ver);
     tVersion.adjustSize();
 
     var rVersion = this.conn.tx(tVersion);
-    
     var e = getError(MessageType.Rversion, rVersion);
     if (e == null) {
         this.msize = rVersion.get32(7);
-        this.version = rVersion.getString(11);
+        this.ver = rVersion.getString(11);
     }
 
     onerror(e);
@@ -65,7 +66,6 @@ Styx.prototype.attach = function(fid, user, aname) {
     tAttach.adjustSize();
 
     var rAttach = this.conn.tx(tAttach);
-
     var e = getError(MessageType.Rattach, rAttach);
     if (e == null)
         return new Qid(7, rAttach);
@@ -148,7 +148,7 @@ Styx.prototype.read = function(fid, offset, cnt) {
     var e = getError(MessageType.Rread, rAttach);
     if (e == null) {
         var len = rRead.get32(7);
-        return rRead.bytes(9 + len);
+        return rRead.getBytes(9 + len);
     }
 
     this.onerror(e);

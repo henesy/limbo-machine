@@ -2,8 +2,9 @@
 // Connection c = new Connection('/myService');
 // var rAttach = c.tx(tAttach);
 
-Connection = function(service) {
+Connection = function(service, onerror) {
     this.service = service;
+    this.onerror = onerror;
 }
 
 Connection.prototype.tx = function(imsg) {
@@ -13,16 +14,16 @@ Connection.prototype.tx = function(imsg) {
 
     req.open("POST", this.service, false);
     req.overrideMimeType("text/plain; charset=x-user-defined");
-    req.send(marshall(imsg.bytes()));
+    req.send(marshall(imsg.getBytes()));
 
     if (req.status > 299 || req.status < 200)
         return new Message([]);
 
     var omsg = new Message(unmarshall(req.responseText));
     if (omsg.get32(0) != omsg.length())
-        throw new IllegalStateException("message lengths do not match");
+        this.onerror("message lengths do not match");
 
-    return msg;
+    return omsg;
 }
 
 function marshall(data) {

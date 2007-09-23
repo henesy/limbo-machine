@@ -1,14 +1,14 @@
 Message = function(bytes, type, tag) {
-    this.mutable = (bytes.length == 0) ? false : true;
+    this.mutable = (bytes.length == 0) ? true : false;
     this.bytes = bytes;
     if (tag != undefined) {
-        this.add32(0, 0);
+        this.add32(0);
         this.add8(type);
         this.add16(tag);
     }
 }
 
-Message.prototype.bytes = function(from, to) {
+Message.prototype.getBytes = function(from, to) {
     if (from == undefined)
         from = 0;
     if (to == undefined) 
@@ -22,9 +22,9 @@ Message.prototype.length = function() {
 }
 
 Message.prototype.setString = function(idx, val) {
-    this.assert(idx, val.length());
-    this.add16(val.length());
-    for (var i = 0, len = val.length(); i < len; i++)
+    this.assert(idx, 2 + val.length);
+    this.add16(val.length);
+    for (var i = 0, len = val.length; i < len; i++)
         this.add8(val.charCodeAt(i) & 0xFF);
 }
 
@@ -34,7 +34,7 @@ Message.prototype.addString = function(val) {
 
 Message.prototype.getString = function(idx) {
     var res = [];
-    var len = get16(idx);
+    var len = this.get16(idx);
     for (var i = idx + 2, len = this.get16(idx); i < len; i++)
         res.push(String.fromCharCode(get8(i)));
 
@@ -65,13 +65,13 @@ Message.prototype.add16 = function(val) {
 }
 
 Message.prototype.get16 = function(idx) {
-    return (get8(idx) << 8) | get8(idx + 1) ;
+    return (this.get8(idx) << 8) | this.get8(idx + 1) ;
 }
 
 Message.prototype.set32 = function(idx, val) {
     this.assert(idx, 4);
-    this.set16((val >> 16) & 0xFFFF);
-    this.set16(val & 0xFFFF);
+    this.set16(idx, (val >> 16) & 0xFFFF);
+    this.set16(idx + 2, val & 0xFFFF);
 }
 
 Message.prototype.add32 = function(val) {
@@ -79,13 +79,13 @@ Message.prototype.add32 = function(val) {
 }
 
 Message.prototype.get32 = function(idx) {
-    return (get16(idx) << 16) | get16(idx + 2) ;
+    return (this.get16(idx) << 16) | this.get16(idx + 2) ;
 }
 
 Message.prototype.set64 = function(idx, val) {
     this.assert(idx, 8);
-    this.set32((val >> 32) & 0xFFFFFFFF);
-    this.set32(val & 0xFFFFFFFFFF);
+    this.set32(idx, (val >> 32) & 0xFFFFFFFF);
+    this.set32(idx + 4, val & 0xFFFFFFFFFF);
 }
 
 Message.prototype.add64 = function(val) {
@@ -93,24 +93,24 @@ Message.prototype.add64 = function(val) {
 }
 
 Message.prototype.get64 = function(idx) {
-    return (get32(idx) << 32) | get32(idx + 4);
+    return (this.get32(idx) << 32) | this.get32(idx + 4);
 }
 
 Message.prototype.assert = function(idx, len) {
-    if (this.mutable != true)
-        throw new IllegalStateException("object is immutable");
+    if (!this.mutable)
+        this.onerror("object is immutable");
 
     var last = idx + len;
     if (last >= 4096)
-        throw new IllegalStateException("maximum message length");
+        this.onerror("maximum message length: " + last);
 
     var dist = (this.bytes.length < last) ? (last - this.bytes.length) : 0;
     while (--dist > 0)
         this.bytes.push(0);
 }
 
-Message.prototype.adjustSize() = function adjustSize() {
-    var size = set32(0, this.bytes.length);
+Message.prototype.adjustSize = function() {
+    var size = this.set32(0, this.bytes.length);
 }
 
 var MessageType = {

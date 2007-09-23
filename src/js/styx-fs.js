@@ -8,7 +8,7 @@ StyxFS = function(service, onerror) {
 StyxFS.prototype.mount = function(user, aname) {
     this.styx.version();
     var qid = this.styx.attach(1, user, aname);
-    this.resources.push(new Resource("/", 1, qid, Mode.OREAD));
+    this.resources.push(new Resource(aname, 1, qid, Mode.OREAD));
 }
 
 StyxFS.prototype.create = function(path, perm, mode) {
@@ -52,11 +52,11 @@ Resource = function(path, fid, qid, mode) {
     this.fid = fid;
     this.qid = qid;
     this.mode = mode;
-}
-Resource.prototype.getPath() { return this.path; }
-Resource.prototype.getFid() { return this.fid; }
-Resource.prototype.getQid() { return this.qid; }
-Resource.prototype.getMode() { return this.mode; }
+};
+Resource.prototype.getPath = function() { return this.path; }
+Resource.prototype.getFid = function() { return this.fid; }
+Resource.prototype.getQid = function() { return this.qid; }
+Resource.prototype.getMode = function() { return this.mode; }
 
 function split(path) {
     return path.split("/+");
