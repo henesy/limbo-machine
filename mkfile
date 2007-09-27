@@ -1,13 +1,14 @@
 # start server: mk start
 # stop server: mk stop
 # clean: mk clean
+# build: mk build
 
 # mount: mount -A tcp!localhost!7777 mnt
 # unmount: unmount mnt
 
 base = `pwd`
 dis = $base/dis
-src = $base/src/impl
+src = $base/impl
 flags = -gw
 
 init:
