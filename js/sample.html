@@ -7,11 +7,15 @@
 <script type="text/javascript" src="connection.js"></script>
 <script type="text/javascript" src="styx.js"></script>
 <script type="text/javascript" src="styx-fs.js"></script>
+
 <script type="text/javascript">
 var fs = new StyxFS("http://localhost:7777", onerror);
 
 function test() {
-    fs.mount("Ostap", "/");
+    var root = fs.mount("Ostap", "/");
+    var dirs = fs.list(root);
+    for (var i = 0; i < dirs.length; i++)
+        alert(dir.name);
 }
 
 function onerror(msg) {

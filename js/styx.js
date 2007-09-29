@@ -12,13 +12,6 @@
 // + - remove
 // - - stat
 // - - wstat
-var NOFID = ~0;
-var NOTAG = ~0;
-var MAXWELEM = 16;
-
-var Mode =
-    {OREAD: 0, OWRITE: 1, ORDWR: 2, OEXEC: 3, OTRUNC: 0x10, ORCLOSE: 0x40};
-
 // TODO: tag checks and asynch messaging
 Styx = function(service, onerror) {
     this.conn = new Connection(service, onerror);

@@ -1,3 +1,12 @@
+// I T Name
+// + - mount(user, path): root
+// + - create
+// + - open
+// - - read
+// - - write
+// - - remove
+// + - list
+// - - close
 StyxFS = function(service, onerror) {
     this.styx = new Styx(service, onerror);
     this.root = null;
@@ -8,7 +17,9 @@ StyxFS = function(service, onerror) {
 StyxFS.prototype.mount = function(user, aname) {
     this.styx.version();
     var qid = this.styx.attach(1, user, aname);
-    this.resources.push(new Resource(aname, 1, qid, Mode.OREAD));
+    this.root = new Resource(aname, 1, qid, Mode.OREAD);
+
+    return this.root;
 }
 
 StyxFS.prototype.create = function(path, perm, mode) {
@@ -29,10 +40,9 @@ StyxFS.prototype.create = function(path, perm, mode) {
 
 StyxFS.prototype.open = function(path, mode) {
     var nws = split(path);
-    var idx = nws.length - 1;
     var res = walkTo(nws);
     if (res != null) {
-        var qid = this.styx.open(res.getFid(), mode);
+        var qid = this.styx.open(res.fid, mode);
         if (qid != null)
             res.mode = mode;
     }
@@ -44,19 +54,17 @@ StyxFS.prototype.open = function(path, mode) {
 StyxFS.prototype.read = function(res, buf) {}
 StyxFS.prototype.write = function(res, buf) {}
 StyxFS.prototype.remove = function(res) {}
-StyxFS.prototype.list = function(res) {}
+
+// FIXME: return all directory entries
+StyxFS.prototype.list = function(res) {
+    if (!res.opened)
+        res.qid = this.styx.open(res.fid, Mode.ORDWR);
+    var msg = new Message(this.styx.read(res.fid, 0, 4096));
+    return [new Dir(0, msg)];
+}
+
 StyxFS.prototype.close = function(res) {}
 
-Resource = function(path, fid, qid, mode) {
-    this.path = path;
-    this.fid = fid;
-    this.qid = qid;
-    this.mode = mode;
-};
-Resource.prototype.getPath = function() { return this.path; }
-Resource.prototype.getFid = function() { return this.fid; }
-Resource.prototype.getQid = function() { return this.qid; }
-Resource.prototype.getMode = function() { return this.mode; }
 
 function split(path) {
     return path.split("/+");
@@ -64,7 +72,7 @@ function split(path) {
 
 function walkTo(path) {
     var fid = this.lastFid++
-    var qids = this.styx.walk(this.root.getFid(), fid, path);
+    var qids = this.styx.walk(this.root.fid, fid, path);
     var res = new Resource(path, fid, qids[qids.length - 1], Mode.ORDWR);
     this.resources.push(res);
 
