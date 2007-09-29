@@ -16,24 +16,26 @@ Qroot, Qctl, Qdata: con big iota;
 init()
 {
     sys = load Sys Sys->PATH;
+
     styx := load Styx Styx->PATH;
     styx->init();
+
     styxservers = load Styxservers Styxservers->PATH;
     styxservers->init(styx);
+    styxservers->traceset(1); # print debugging info
+
     nametree = load Nametree Nametree->PATH;
     nametree->init();
+
     sys->pctl(Sys->FORKNS, nil);
 }
 
 service(fd : ref Sys->FD)
 {
-    sys->print("service\n");
-
     (tree, treeop) := nametree->start();
     tree.create(Qroot, dir(".", 8r555|Sys->DMDIR, Qroot));
     tree.create(Qroot, dir("ctl", 8r666, Qctl));
     tree.create(Qroot, dir("data", 8r444, Qdata));
-
     (tchan, srv) := Styxserver.new(fd, Navigator.new(treeop), Qroot);
 
     while((gm := <-tchan) != nil) {

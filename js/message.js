@@ -23,9 +23,10 @@ Message.prototype.length = function() {
 
 Message.prototype.setString = function(idx, val) {
     this.assert(idx, 2 + val.length);
-    this.add16(val.length);
-    for (var i = 0, len = val.length; i < len; i++)
-        this.add8(val.charCodeAt(i) & 0xFF);
+    this.set16(idx, val.length);
+    idx += 2;
+    for (var i = 0, len = val.length; i < len; i++, idx++)
+        this.set8(idx, val.charCodeAt(i) & 0xFF);
 }
 
 Message.prototype.addString = function(val) {
@@ -57,8 +58,8 @@ Message.prototype.get8 = function(idx) {
 
 Message.prototype.set16 = function(idx, val) {
     this.assert(idx, 2);
-    this.set8(idx++, (val >> 8) & 0xFF);
-    this.set8(idx, val & 0xFF);
+    this.set8(idx++, val & 0xFF);
+    this.set8(idx, (val >> 8) & 0xFF);
 }
 
 Message.prototype.add16 = function(val) {
@@ -66,13 +67,13 @@ Message.prototype.add16 = function(val) {
 }
 
 Message.prototype.get16 = function(idx) {
-    return (this.get8(idx) << 8) | this.get8(idx + 1) ;
+    return (this.get8(idx + 1) << 8) | this.get8(idx) ;
 }
 
 Message.prototype.set32 = function(idx, val) {
     this.assert(idx, 4);
-    this.set16(idx, (val >> 16) & 0xFFFF);
-    this.set16(idx + 2, val & 0xFFFF);
+    this.set16(idx, val & 0xFFFF);
+    this.set16(idx + 2, (val >> 16) & 0xFFFF);
 }
 
 Message.prototype.add32 = function(val) {
@@ -80,13 +81,13 @@ Message.prototype.add32 = function(val) {
 }
 
 Message.prototype.get32 = function(idx) {
-    return (this.get16(idx) << 16) | this.get16(idx + 2) ;
+    return (this.get16(idx + 2) << 16) | this.get16(idx);
 }
 
 Message.prototype.set64 = function(idx, val) {
     this.assert(idx, 8);
-    this.set32(idx, (val >> 32) & 0xFFFFFFFF);
-    this.set32(idx + 4, val & 0xFFFFFFFFFF);
+    this.set32(idx, val & 0xFFFFFFFF);
+    this.set32(idx + 4, (val >> 32) & 0xFFFFFFFF);
 }
 
 Message.prototype.add64 = function(val) {
@@ -94,7 +95,7 @@ Message.prototype.add64 = function(val) {
 }
 
 Message.prototype.get64 = function(idx) {
-    return (this.get32(idx) << 32) | this.get32(idx + 4);
+    return (this.get32(idx + 4) << 32) | this.get32(idx);
 }
 
 Message.prototype.assert = function(idx, len) {

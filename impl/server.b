@@ -21,21 +21,16 @@ init(nil: ref Draw->Context, args: list of string)
     if (ok < 0)
         raise "cannot announce connection";
 
-    for (;;)
-        process(conn);
-}
-
-process(c : Sys->Connection)
-{
-    (ok, nc) := sys->listen(c);
-    if (ok < 0)
-        raise "listen failed";
-
-    sys->print("incoming connection ...\n");
-
     machine = load Machine "http.dis";
     machine->init();
-    fd := sys->open(nc.dir + "/data", sys->ORDWR);
 
-    spawn machine->service(fd);
+    for (;;) {
+        (ok, nc) := sys->listen(conn);
+        if (ok < 0)
+            raise "listen failed";
+
+        fd := sys->open(nc.dir + "/data", sys->ORDWR);
+
+        spawn machine->service(fd);
+    }
 }

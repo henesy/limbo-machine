@@ -8,6 +8,7 @@ include "string.m";
 #     hash: Hash;
 
 include "../module/machine.m";
+    sample: Machine;
 
 Request: adt {
     request: string;
@@ -19,47 +20,53 @@ Request: adt {
 
 Request.str(s: self Request): string
 {
-    res := "REQUEST: " + s.request + "\nHEADERS: ";
-    for (; s.headers != nil; s.headers = tl s.headers)
-        res += (hd s.headers)[0] + " : " + (hd s.headers)[1];
-    res += "\nBODY: " + string(len s.body) + "(bytes)";
-
-    return res;
+    return "request: " + (string s.body);
 }
+
+pipe := array[2] of ref Sys->FD;
 
 init()
 {
     sys = load Sys Sys->PATH;
     str = load String String->PATH;
     # hash = load Hash Hash->PATH;
+
+    sample = load Machine "sample.dis";
+    sample->init();
+
+    if (sys->pipe(pipe) != 0)
+        raise "cannot create pipe";
+
+    spawn sample->service(pipe[1]);
 }
 
 service(fd : ref Sys->FD)
 {
-    sys->print("http connection\n");
-
     req := request(fd);
-    sys->print("%s\n", req.str());
-    
-    error := array of byte
-        "HTTP/1.0 200 OK\nContent-Length: 24\n\n0000000c6bffff0003616263";
-    sys->write(fd, error, len error);
-}
+    sys->print("\n%s\n", req.str());
 
-print(fd: ref Sys->FD)
-{
+    data := unmarshall(req.body);
+    sys->write(pipe[0], data, len data);
+
     buf := array[4096] of byte;
-    read := sys->read(fd, buf, len buf);
+    read := sys->read(pipe[0], buf, len buf);
 
-    sys->print("read %d bytes\n", read);
-
-    msg := string buf[:read];
-
-    sys->print("%s\n", msg);
+    resp := response(buf[:read]);
+    sys->write(fd, resp, len resp);
 }
 
+response(body: array of byte): array of byte
+{
+    body = marshall(body);
+    sys->print("response: %s\n", string body);
+    return array of byte ("HTTP/1.0 200 OK\nContent-Length: "
+         + string (len body) + "\n\n" + (string body));
+}
+
+# FIXME
 # - What if headers exceed the buf size?
 # - Read shd do more than one attempt.
+# - Unsafe array indexing and too many constants.
 request(fd: ref Sys->FD): Request
 {
     buf := array[8192] of byte;
@@ -80,18 +87,17 @@ request(fd: ref Sys->FD): Request
         if (i < 0)
             i = len line - 1;
 
-        hdr = array[] of {string line[0:i], string line[i:]};
+        hdr := array[] of {string line[0:i], string line[(i + 2):]};
 
-        sys->print("key: '%s', value: '%s'\n", hdr[0], hdr[1]);
         if (str->prefix("content-length", str->tolower(hdr[0])))
-            (clen, nil) = str->toint(hdr[1], 10);
+            clen = int hdr[1];
 
         headers = hdr :: headers;
     }
 
     body := array[clen] of byte;
     last := 0;
-    for (i := (idx + 1); i < read; i++)
+    for (i := (idx + 4); i < read; i++)
         body[last++] = buf[i];
 
     read = clen - (read - idx);
@@ -132,4 +138,43 @@ indexOf(text: array of byte, str: string): int
     }
 
     return idx;
+}
+
+marshall(buf: array of byte): array of byte
+{
+    res := array[(len buf) * 2] of byte;
+    for (i := 0; i < len buf; i++) {
+        res[2 * i] = enc(buf[i] >> 4);
+        res[2 * i + 1] = enc(buf[i] & byte 16r0F);
+    }
+
+    return res;
+}
+
+enc(b: byte): byte
+{
+    x := byte 48;
+    if (b >= byte 10)
+        x = byte 87;
+
+    return (b + x);
+}
+
+unmarshall(buf: array of byte): array of byte
+{
+    res := array[(len buf) / 2] of byte;
+    idx := 0;
+    for (i := 0; i < len buf; i += 2)
+        res[idx++] = byte 16 * dec(buf[i]) + dec(buf[i + 1]);
+
+    return res;
+}
+
+dec(b: byte): byte
+{
+    x := byte 48;
+    if (b >= byte 97)
+        x = byte 87;
+
+    return (b - x);
 }

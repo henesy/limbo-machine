@@ -5,21 +5,19 @@
 Connection = function(service, onerror) {
     this.service = service;
     this.onerror = onerror;
+    this.req = new XMLHttpRequest();
 }
 
 Connection.prototype.tx = function(imsg) {
-    var req = new XMLHttpRequest();
-    netscape.security.PrivilegeManager.enablePrivilege(
-            "UniversalBrowserRead");
+    netscape.security.PrivilegeManager.enablePrivilege("UniversalBrowserRead");
+    this.req.open("POST", this.service, false);
+    this.req.overrideMimeType("text/plain; charset=x-user-defined");
+    this.req.send(marshall(imsg.getBytes()));
 
-    req.open("POST", this.service, false);
-    req.overrideMimeType("text/plain; charset=x-user-defined");
-    req.send(marshall(imsg.getBytes()));
-
-    if (req.status > 299 || req.status < 200)
+    if (this.req.status > 299 || this.req.status < 200)
         return new Message([]);
 
-    var omsg = new Message(unmarshall(req.responseText));
+    var omsg = new Message(unmarshall(this.req.responseText));
     if (omsg.get32(0) != omsg.length())
         this.onerror("message lengths do not match");
 

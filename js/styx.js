@@ -41,9 +41,9 @@ Styx.prototype.version = function() {
     if (e == null) {
         this.msize = rVersion.get32(7);
         this.ver = rVersion.getString(11);
+    } else {
+        this.onerror(e);
     }
-
-    onerror(e);
 }
 
 Styx.prototype.flush = function(tag) {
