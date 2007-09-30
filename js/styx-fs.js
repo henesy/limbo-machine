@@ -17,7 +17,7 @@ StyxFS = function(service, onerror) {
 StyxFS.prototype.mount = function(user, aname) {
     this.styx.version();
     var qid = this.styx.attach(1, user, aname);
-    this.root = new Resource(aname, 1, qid, Mode.OREAD);
+    this.root = new Resource(aname, 1, qid);
 
     return this.root;
 }
@@ -57,14 +57,26 @@ StyxFS.prototype.remove = function(res) {}
 
 // FIXME: return all directory entries
 StyxFS.prototype.list = function(res) {
-    if (!res.opened)
-        res.qid = this.styx.open(res.fid, Mode.ORDWR);
-    var msg = new Message(this.styx.read(res.fid, 0, 4096));
-    return [new Dir(0, msg)];
+    if (!res.opened) {
+        res.qid = this.styx.open(res.fid, Mode.OREAD);
+        res.opened = true;
+    }
+
+    var msg = new Message(this.styx.read(res.fid, 0, 4000));
+    var dirs = [];
+    for (var len = msg.length(), idx = 0; idx < len;) {
+        var dir = new Dir(idx, msg);
+        if (dir.sz == 0)
+            break;
+
+        dirs.push(dir);
+        idx += (dir.sz + /* sz field itself */ 2);
+    }
+
+    return dirs;
 }
 
 StyxFS.prototype.close = function(res) {}
-
 
 function split(path) {
     return path.split("/+");
@@ -73,8 +85,8 @@ function split(path) {
 function walkTo(path) {
     var fid = this.lastFid++
     var qids = this.styx.walk(this.root.fid, fid, path);
-    var res = new Resource(path, fid, qids[qids.length - 1], Mode.ORDWR);
+    var res = new Resource(path, fid, qids[qids.length - 1]);
     this.resources.push(res);
 
-    return dir;
+    return res;
 }

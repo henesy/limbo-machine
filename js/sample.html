@@ -2,28 +2,45 @@
 <title>Test Page</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
 
-<script type="text/javascript" src="qid.js"></script>
+<script type="text/javascript" src="types.js"></script>
 <script type="text/javascript" src="message.js"></script>
 <script type="text/javascript" src="connection.js"></script>
 <script type="text/javascript" src="styx.js"></script>
 <script type="text/javascript" src="styx-fs.js"></script>
 
 <script type="text/javascript">
-var fs = new StyxFS("http://localhost:7777", onerror);
+var fs = null;
+var err = false;
 
-function test() {
-    var root = fs.mount("Ostap", "/");
-    var dirs = fs.list(root);
+function mount() {
+    var e = document.getElementById("service");
+    fs = new StyxFS(e.value, onerror);
+
+    fs.mount("Ostap", "/");
+    if (!err)
+        e.disabled = "true";
+}
+
+function list() {
+    var dirs = fs.list(fs.root);
+    var e = document.getElementById("result");
     for (var i = 0; i < dirs.length; i++)
-        alert(dir.name);
+        e.innerHTML += dirs[i].name + "&nbsp;" + dirs[i].length + "<br/>";
 }
 
 function onerror(msg) {
     alert("'" + msg + "'");
+    err = true;
 }
 </script>
 </head>
 
 <body>
-    <input type="button" name="button" value="Test" onclick="test()"/>
+    <input id="service" type="text" size="20" value="http://localhost:7777"/>
+    &nbsp;
+    <input id="mount" type="button" value="Mount" onclick="mount()"/>
+    &nbsp;
+    <input id="list" type="button" value="List Root" onclick="list()"/>
+
+    <div id="result"/>
 </body>

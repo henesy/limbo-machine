@@ -12,6 +12,7 @@
 // + - remove
 // - - stat
 // - - wstat
+
 // TODO: tag checks and asynch messaging
 Styx = function(service, onerror) {
     this.conn = new Connection(service, onerror);
@@ -138,10 +139,10 @@ Styx.prototype.read = function(fid, offset, cnt) {
     tRead.adjustSize();
 
     var rRead = this.conn.tx(tRead);
-    var e = getError(MessageType.Rread, rAttach);
+    var e = getError(MessageType.Rread, rRead);
     if (e == null) {
         var len = rRead.get32(7);
-        return rRead.getBytes(9 + len);
+        return rRead.getBytes(11);
     }
 
     this.onerror(e);

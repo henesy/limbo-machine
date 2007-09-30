@@ -6,27 +6,23 @@ Resource = function(path, fid, qid, mode, opened) {
     this.path = path;
     this.fid = fid;
     this.qid = qid;
-    this.mode = (mode == undefined) ? false : mode;
+    this.mode = (mode == undefined) ? Mode.OREAD : mode;
     this.opened = (opened == undefined) ? false : opened;
 }
 
 Dir = function(idx, msg) {
-    var start = idx;
-
-    this.name = msg.getString(idx);
-    this.uid = msg.getString(idx += (this.name.length + 2));
-    this.gid = msg.getString(idx += (this.uid.length + 2));
-    this.muid = msg.getString(idx += (this.gid.length + 2));
-    this.qid = new Qid(idx += (this.muid.length + 2), msg);
+    this.sz = msg.get16(idx);
+    this.type = msg.get16(idx += 2);
+    this.dev = msg.get32(idx += 2);
+    this.qid = new Qid(idx += 4, msg);
     this.mode = msg.get32(idx += 13);
     this.atime = msg.get32(idx += 4);
     this.mtime = msg.get32(idx += 4);
     this.length = msg.get64(idx += 4);
-    this.dtype = msg.get32(idx += 8);
-    this.dev = msg.get32(idx += 4);
-    idx += 4;
-
-    this.size = start - idx;
+    this.name = msg.getString(idx += 8);
+    this.uid = msg.getString(idx += (this.name.length + 2));
+    this.gid = msg.getString(idx += (this.uid.length + 2));
+    this.muid = msg.getString(idx += (this.gid.length + 2));
 }
 
 Qid = function(idx, msg) {
