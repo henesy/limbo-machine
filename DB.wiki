@@ -1,12 +1,10 @@
 #summary The DB Driver Implementation Ideas.
 
-We can implement the db fs:
+We can implement the DB FS:
 
-/db/tables
-    query
-    update
+/db/{tables,query,update}
 
-There are two ways to talk to the actual db:
+There are two ways to talk to the actual DB:
 
-* Bridge between the Limbo module and the C DB driver (see limbo -T option)
-* Native Limbo communication with the DB
+  * Bridge between the Limbo module and the C DB driver (see limbo -T option)
+  * Native Limbo communication with the DB
