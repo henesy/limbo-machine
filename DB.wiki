@@ -5,6 +5,8 @@ We can implement the DB FS:
 
 /db/{tables,query,update}
 
+There is a [http://witme.sourceforge.net/libferris.web/index.html libferris] project which can expose the postgresql DB as the file system. The linux journal article about libferris is available [http://www.linuxjournal.com/article/8901 here].
+
 There are two ways to talk to the actual DB:
 
   * Bridge between the Limbo module and the C DB driver (see limbo -T option)
