@@ -1,0 +1,35 @@
+#summary The JavaScript Styx Implementation.
+#labels Featured,Phase-Implementation
+
+== Introduction ==
+
+The JavaScript module consists of the following components:
+
+  * styx-fs.js -- high level interface to the Styx protocol
+  * styx.js -- Styx protocol implementation
+  * connection.js -- low level communication
+  * message.js -- binary data message
+  * types.js -- type definitions and constants
+
+Currently, Firefox is the only browser supported. More browsers will be supported in the future.
+
+== High Level Interface ==
+
+Consider the following code snippet:
+{{{
+var fs = new StyxFS("/svc", ehandler);
+fs.mount("someone", "/net");
+
+var dns = fs.open("/dev/dns", Mode.OREAD);
+
+var msg = new Message([]);
+msg.addString("code.google.com ip");
+
+fs.write(dns, 0, buf.getBytes());
+msg = new Message(fs.read(dns, 0, 128));
+var ip = msg.getString(0);
+}}}
+
+== Implementation ==
+
+TBD
