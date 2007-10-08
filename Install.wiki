@@ -8,6 +8,6 @@ In order to run the system, you need to [http://code.google.com/p/limbo-machine/
   * Go to the limbo-machine directory
   * Build and run the server program
   ; mk clean build start
-  * Then open a browser (firefox is the only supported browser as for now) on your native OS and go to [# file://<limbo.machine.home>/js/sample.html]
+  * Then open a browser (firefox is the only supported browser as for now) on your native OS and go to {{{file://<limbo.machine.home>/js/sample.html}}}
   * To stop the system
   ; mk stop
