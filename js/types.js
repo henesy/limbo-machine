@@ -3,6 +3,7 @@ var NOTAG = ~0;
 var MAXWELEM = 16;
 
 Resource = function(path, fid, qid, mode, opened) {
+    this.key = "_" + fid;
     this.path = path;
     this.fid = fid;
     this.qid = qid;

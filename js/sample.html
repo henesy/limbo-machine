@@ -1,6 +1,6 @@
 <head>
 <title>Test Page</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"></meta>
 
 <script type="text/javascript" src="types.js"></script>
 <script type="text/javascript" src="message.js"></script>
@@ -13,17 +13,28 @@ var fs = null;
 var err = false;
 
 function mount() {
-    var e = document.getElementById("service");
-    fs = new StyxFS(e.value, onerror);
+    fs = new StyxFS(e("service").value, onerror);
 
     fs.mount("Ostap", "/");
-    if (!err)
-        e.disabled = "true";
+    if (!err) {
+        e("service").disabled = "true";
+        e("mount").disabled = "true";
+    }
+}
+
+function unmount() {
+    if (fs != null) {
+        fs.unmount();
+
+        e("service").disabled = "";
+        e("mount").disabled = "";
+    }
 }
 
 function list() {
     var dirs = fs.list(fs.root);
     var e = document.getElementById("result");
+    e.innerHTML = "";
     for (var i = 0; i < dirs.length; i++)
         e.innerHTML += dirs[i].name + "&nbsp;" + dirs[i].length + "<br/>";
 }
@@ -32,13 +43,17 @@ function onerror(msg) {
     alert("'" + msg + "'");
     err = true;
 }
+
+function e(id) { return document.getElementById(id); }
 </script>
 </head>
 
-<body>
+<body onunload="unmount()">
     <input id="service" type="text" size="20" value="http://localhost:7777"/>
     &nbsp;
     <input id="mount" type="button" value="Mount" onclick="mount()"/>
+    &nbsp;
+    <input id="unmount" type="button" value="Unmount" onclick="unmount()"/>
     &nbsp;
     <input id="list" type="button" value="List Root" onclick="list()"/>
 
