@@ -17,16 +17,17 @@ Currently, Firefox is the only browser supported. More browsers will be supporte
 
 Consider the following code snippet:
 {{{
-var fs = new StyxFS("/svc", ehandler);
+var fs = new StyxFS("/styx", ehandler);
 fs.mount("someone", "/net");
 
-var dns = fs.open("/dev/dns", Mode.OREAD);
+var dns = fs.open("/dns", Mode.ORDWR);
 
 var msg = new Message([]);
 msg.addString("code.google.com ip");
 
-fs.write(dns, 0, buf.getBytes());
-msg = new Message(fs.read(dns, 0, 128));
+fs.write(dns, 0, msg.getBytes());
+msg = new Message(fs.read(dns, 0, 16));
+
 var ip = msg.getString(0);
 }}}
 
