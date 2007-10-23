@@ -5,7 +5,6 @@ include "sys.m";
     sys: Sys;
 
 include "../module/machine.m";
-    machine: Machine;
 
 Server: module
 {
@@ -21,8 +20,10 @@ init(nil: ref Draw->Context, args: list of string)
     if (ok < 0)
         raise "cannot announce connection";
 
-    machine = load Machine "http.dis";
-    machine->init();
+    # machine := load Machine "http.dis";
+    # machine->init();
+    dispatch := load Machine "dispatch.dis";
+    dispatch->init();
 
     for (;;) {
         (ok, nc) := sys->listen(conn);
@@ -31,6 +32,7 @@ init(nil: ref Draw->Context, args: list of string)
 
         fd := sys->open(nc.dir + "/data", sys->ORDWR);
 
-        spawn machine->service(fd);
+        # spawn machine->service(fd);
+        spawn dispatch->service(fd);
     }
 }
