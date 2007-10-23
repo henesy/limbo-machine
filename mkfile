@@ -22,12 +22,13 @@ clean:
     limbo $flags $src/$stem.b
     mv $stem.dis $stem.sbl $dis
 
-build: clean init server.dis sample.dis http.dis
-    ls $dis
+build: clean init server.dis sample.dis http.dis dispatch.dis
+    cp $src/dispatch.cfg $dis
 
 start:
     cd $dis
     server &
 
 stop:
+    kill -g Machine
     kill -g Server
