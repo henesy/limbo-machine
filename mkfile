@@ -8,7 +8,8 @@
 
 base = `pwd`
 dis = $base/dis
-src = $base/impl
+web = $base/web
+db = $base/db
 flags = -gw
 
 init:
@@ -18,12 +19,14 @@ clean:
     rm -rf $dis
     rm -f $base/*.dis $base/*.sbl
 
-%.dis: $src/%.b
-    limbo $flags $src/$stem.b
+%.dis: %.b 
+    limbo $flags -o $stem.dis $stem.b 
     mv $stem.dis $stem.sbl $dis
 
-build: clean init server.dis sample.dis http.dis dispatch.dis
-    cp $src/dispatch.cfg $dis
+build: clean init $web/server.dis $web/sample.dis \
+       $web/http.dis $web/dispatch.dis \
+       $db/postgres.dis $db/binary.dis
+    cp $web/dispatch.cfg $dis
 
 start:
     cd $dis
