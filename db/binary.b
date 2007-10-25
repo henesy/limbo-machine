@@ -21,14 +21,14 @@ Msg.add_8(m: self ref Msg, val: int)
 
 Msg.add_16(m: self ref Msg, val: int)
 {
-    m.add_8(val);
     m.add_8(val >> 8);
+    m.add_8(val);
 }
 
 Msg.add_32(m: self ref Msg, val: int)
 {
-    m.add_16(val);
     m.add_16(val >> 16);
+    m.add_16(val);
 }
 
 Msg.add_string(m: self ref Msg, val: string)
@@ -47,12 +47,12 @@ Msg.get_8(m: self ref Msg, idx: int): int
 
 Msg.get_16(m: self ref Msg, idx: int): int
 {
-    return m.get_8(idx) | (m.get_8(idx + 1) << 8);
+    return (m.get_8(idx) << 8) | m.get_8(idx + 1);
 }
 
 Msg.get_32(m: self ref Msg, idx: int): int
 {
-    return m.get_16(idx) | (m.get_16(idx + 2) << 16);
+    return (m.get_16(idx) << 16) | m.get_16(idx + 2);
 }
 
 Msg.get_string(m: self ref Msg, idx: int): string
