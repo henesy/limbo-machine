@@ -10,4 +10,4 @@ There is a [http://witme.sourceforge.net/libferris.web/index.html libferris] pro
 There are two ways to talk to the actual DB:
 
   * Bridge between the Limbo module and the C DB driver (see limbo -T option)
-  * Native Limbo communication with the DB (based on the [http://www.postgresql.org/docs/8.1/interactive/protocol.html PostgreSQL protocol])
+  * Native Limbo communication with the DB (for PostgreSQL database it has to be based on the [http://www.postgresql.org/docs/8.1/interactive/protocol.html PostgreSQL protocol])
