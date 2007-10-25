@@ -67,8 +67,8 @@ Msg.get_string(m: self ref Msg, idx: int): string
 to_array(l: list of byte): array of byte
 {
     res := array[len l] of byte;
-    for (idx := 0; l != nil; l = tl l)
-        res[idx++] = hd l;
+    for (idx := (len l) - 1; l != nil; l = tl l)
+        res[idx--] = hd l;
 
     return res;
 }
