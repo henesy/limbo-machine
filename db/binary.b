@@ -1,6 +1,7 @@
 implement Binary;
 
 include "binary.m";
+include "sys.m";
 
 # FIXME: add_* are inefficient because of the small ensure_capacity footprint
 
@@ -10,6 +11,27 @@ new(src: array of byte): ref Msg
         return ref Msg(array[0] of byte, 0);
     } else {
         return ref Msg(src, len src);
+    }
+}
+
+read_msg(sys: Sys, fd: ref Sys->FD): ref Msg
+{
+    sz_buf := array[4] of byte;
+    read_fully(sys, fd, sz_buf);
+
+    buf := array[new(sz_buf).get_32(0) - 4] of byte;
+    read_fully(sys, fd, buf);
+
+    return new(buf);
+}
+
+read_fully(sys: Sys, fd: ref Sys->FD, buf: array of byte)
+{
+    off := 0;
+    sz := len buf;
+    for (read := sys->pread(fd, buf, sz, big off); read < sz - off;) {
+        off += read;
+        read = sys->pread(fd, buf, sz - off, big off);
     }
 }
 
