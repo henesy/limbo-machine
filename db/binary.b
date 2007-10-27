@@ -3,26 +3,36 @@ implement Binary;
 include "binary.m";
 include "sys.m";
 
-# FIXME: add_* are inefficient because of the small ensure_capacity footprint
-
 new(src: array of byte): ref Msg
 {
     if (src == nil) {
-        return ref Msg(array[0] of byte, 0);
+        return ref Msg(array[0] of byte);
     } else {
-        return ref Msg(src, len src);
+        return ref Msg(src);
     }
 }
 
 read_msg(sys: Sys, fd: ref Sys->FD): ref Msg
 {
-    sz_buf := array[4] of byte;
+    sz_buf := array[5] of byte;
     read_fully(sys, fd, sz_buf);
 
-    buf := array[new(sz_buf).get_32(0) - 4] of byte;
-    read_fully(sys, fd, buf);
+    sz := new(sz_buf[1:]).get_32(0);
 
-    return new(buf);
+    buf := array[sz - (len sz_buf) + 1] of byte;
+    read_fully(sys, fd, buf);
+    
+    # TODO: read_fully with offsets instead
+    res := array[sz + 1] of byte;
+    for (i := 0; i < sz; i++) {
+        if (i < len sz_buf) {
+            res[i] = sz_buf[i];
+        } else {
+            res[i] = buf[i - (len sz_buf)];
+        }
+    }
+    
+    return new(res);
 }
 
 read_fully(sys: Sys, fd: ref Sys->FD, buf: array of byte)
@@ -35,31 +45,62 @@ read_fully(sys: Sys, fd: ref Sys->FD, buf: array of byte)
     }
 }
 
+Msg.set_8(m: self ref Msg, val, idx: int)
+{
+    if (idx >= len m.bytes)
+        m.bytes = ensure_capacity(m.bytes, idx + 1);
+
+    m.bytes[idx] = byte(16rFF & val);
+}
+
+Msg.set_16(m: self ref Msg, val, idx: int)
+{
+    if (idx + 2 >= len m.bytes)
+        m.bytes = ensure_capacity(m.bytes, idx + 2);
+
+    m.set_8(val >> 8, idx);
+    m.set_8(val, idx + 1);
+}
+
+Msg.set_32(m: self ref Msg, val, idx: int)
+{
+    if (idx + 4 >= len m.bytes)
+        m.bytes = ensure_capacity(m.bytes, idx + 4);
+
+    m.set_16(val >> 16, idx);
+    m.set_16(val, idx + 2);
+}
+
+Msg.set_string(m: self ref Msg, val: string, idx: int)
+{
+    if (idx + len val + 1 >= len m.bytes)
+        m.bytes = ensure_capacity(m.bytes, idx + len val + 1);
+
+    str := array of byte val;
+    for (i := 0; i < len str; i++)
+        m.set_8(int str[i], idx++);
+
+    m.set_8(0, idx);
+}
+
 Msg.add_8(m: self ref Msg, val: int)
 {
-    m.bytes = ensure_capacity(m.bytes, len m.bytes + 1);
-    m.bytes[m.idx++] = byte(16rFF & val);
+    m.set_8(val, len m.bytes);
 }
 
 Msg.add_16(m: self ref Msg, val: int)
 {
-    m.add_8(val >> 8);
-    m.add_8(val);
+    m.set_16(val, len m.bytes);
 }
 
 Msg.add_32(m: self ref Msg, val: int)
 {
-    m.add_16(val >> 16);
-    m.add_16(val);
+    m.set_32(val, len m.bytes);
 }
 
 Msg.add_string(m: self ref Msg, val: string)
 {
-    str := array of byte val;
-    for (i := 0; i < len str; i++)
-        m.add_8(int str[i]);
-
-    m.add_8(0);
+    m.set_string(val, len m.bytes);
 }
 
 Msg.get_8(m: self ref Msg, idx: int): int
