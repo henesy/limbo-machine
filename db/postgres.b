@@ -40,6 +40,19 @@ init(nil: ref Draw->Context, argv: list of string)
     sys->print("Establishing a connection...\n");
 
     sys->sleep(1000);
+    # send a simple query
+    msg = bin->new(nil);
+    msg.add_8( int "Q"[0] );
+    #msg.add_32( 20 );
+    #msg.add_string("select * from a");
+    msg.add_32(5);
+    msg.add_string("");
+    #msg.add_32(7);
+    #msg.add_string("1");
+    sys->write(fd, msg.bytes, len msg.bytes);
+    sys->print("Sending a query...\n");
+    
+    sys->sleep(2000);
 }
 
 read(sys: Sys, fd: ref Sys->FD) 
