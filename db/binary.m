@@ -21,5 +21,7 @@ Binary: module {
         get_16: fn(m: self ref Msg, idx: int): int;
         get_32: fn(m: self ref Msg, idx: int): int;
         get_string: fn(m: self ref Msg, idx: int): string;
+        
+        get_char: fn(m:self ref Msg, idx: int): string;
     };
 };
