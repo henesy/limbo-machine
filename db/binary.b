@@ -127,14 +127,6 @@ Msg.get_string(m: self ref Msg, idx: int): string
     return string to_array(str);
 }
 
-Msg.get_char(m: self ref Msg, idx: int): string
-{
-  str := array[1] of byte;
-  str[0] = byte m.get_8(idx);
-  
-  return string str; 
-}
-
 to_array(l: list of byte): array of byte
 {
     res := array[len l] of byte;
