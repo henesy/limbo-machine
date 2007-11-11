@@ -1,0 +1,37 @@
+#summary Apache HTTPD module for the Styx message forwarding.
+
+=== Introduction ===
+
+This module acts as a gateway between the [JS JavaScript] Styx protocol implementation and Styx servers run under [http://code.google.com/p/inferno-os Inferno OS]. The [JS] library wraps Styx messages into HTTP posts (base16 encoded atm) and transmits them to httpd. [ModLM] does the following:
+  * decodes HTTP post from a client
+  * transmits the binary message to a Styx server
+  * reads a binary response from the Styx server
+  * encodes the received message to HTTP response
+  * sends HTTP response back to the client
+
+The module was tested with httpd-2.2.6 only.
+
+=== Installation ===
+
+There are no binaries available yet for the Limbo Machine. This section describes how to build and install the module from source. You will need the APXS ([http://httpd.apache.org/docs/2.2/programs/apxs.html APache eXtenSion]) tool to build the module. You can find the windows version of APXS [http://www.apachelounge.com/download here].
+
+  * *svn co* as described [http://code.google.com/p/limbo-machine/source here]
+  * cd /path/to/limbo-machine
+  * apxs -llibhttpd -llibapr-1 -llibaprutil-1 -ci mod_lm_tunnel.c
+  * edit apache config:
+    * add the LoadModule directive:
+{{{
+LoadModule lm_module modules/mod_lm_tunnel.so
+}}}
+    * set the 'lm-tunnel' handler
+{{{
+<Location /styx>
+    SetHandler lm-tunnel
+</Location>
+}}}
+  * test the module
+    * httpd -k start
+    * open the following URL http://localhost/styx in your browser (please change host/port for your apache installation)
+    * you should see the *Limbo Machine Tunnel* text
+
+_Please note that the styx server address is currently hardcoded. It is tcp!localhost!7777. We will make this a configuration parameter in the future._
