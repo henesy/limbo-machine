@@ -208,42 +208,52 @@ static int mrecv(request_rec *r, char *msg, int *len) {
 }
 
 static apr_socket_t *s = NULL;
+static apr_sockaddr_t *addr = NULL;
 
 static apr_socket_t* mconnect(request_rec *r) {
-    apr_sockaddr_t *addr;
     apr_status_t rv;
-    conn_rec *c = r->connection;
+    process_rec *p = r->connection->base_server->process;
 
     if (s != NULL)
         return s;
 
-    rv = apr_socket_create(&s, APR_INET, SOCK_STREAM, APR_PROTO_TCP, c->pool);
+    rv = apr_socket_create(&s, APR_INET, SOCK_STREAM, APR_PROTO_TCP, p->pool);
     if (rv != APR_SUCCESS) {
         ap_log_rerror(APLOG_MARK, APLOG_ERR, rv, r, "socket creation failed");
-        return (s = NULL);
+        mclose(r);
+
+        return NULL;
     }
 
-    rv = apr_socket_opt_set(s, APR_SO_KEEPALIVE, 300);
+    rv = apr_socket_opt_set(s, APR_SO_KEEPALIVE, 1);
     if (rv != APR_SUCCESS) {
         ap_log_rerror(APLOG_MARK, APLOG_ERR, rv, r, "setting socket options");
-        return (s = NULL);
+        mclose(r);
+
+        return NULL;
     }
 
-    rv = apr_sockaddr_info_get(&addr, "localhost", APR_INET, 7777, 0, c->pool);
+    rv = apr_sockaddr_info_get(&addr, "localhost", APR_INET, 7777, 0, p->pool);
     if (rv != APR_SUCCESS) {
         ap_log_rerror(APLOG_MARK, APLOG_ERR, rv, r, "addr resolution failed");
-        return (s = NULL);
+        mclose(r);
+
+        return NULL;
     }
 
     rv = apr_socket_connect(s, addr);
     if (rv != APR_SUCCESS) {
         ap_log_rerror(APLOG_MARK, APLOG_ERR, rv, r, "socket connect failed");
-        return (s = NULL);
+        mclose(r);
+
+        return NULL;
     }
 
     return s;
 }
 
+// TODO: free apr_sockaddr_t *addr and apr_socket_t *s
+// they use per process memory pool
 static void mclose(request_rec *r) {
     apr_status_t rv;
     if (s != NULL && (rv = apr_socket_close(s)) != APR_SUCCESS)
@@ -290,7 +300,7 @@ static msg_t* encode(request_rec *r, msg_t *msg) {
 
     ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server,
             "[E] m: %s, sz: %d, ressz: %d", res == NULL ? NULL : res->data,
-            res->size, di);
+            res->size, mi);
 
     return res;
 }
