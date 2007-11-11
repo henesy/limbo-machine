@@ -32,6 +32,8 @@ init()
 
 service(fd : ref Sys->FD)
 {
+    sys->print("[c] start\n");
+
     (tree, treeop) := nametree->start();
     tree.create(Qroot, dir(".", 8r555|Sys->DMDIR, Qroot));
     tree.create(Qroot, dir("ctl", 8r666, Qctl));
@@ -43,6 +45,8 @@ service(fd : ref Sys->FD)
         # Tmsg.Read and Tmsg.Write at least
         srv.default(gm);
     }
+
+    sys->print("[c] end\n");
 
     tree.quit();
 }

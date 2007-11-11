@@ -31,20 +31,14 @@ build_map(): list of (string, Machine)
 
     records := cfg->lookup(MAP);
     for (; records != nil; records = tl records) {
-        sys->print("1\n");
         (nil, record) := hd records;
         for (; record.tuples != nil; record.tuples = tl record.tuples) {
-            sys->print("2\n");
             tuple := hd record.tuples;
             for (; tuple.attrs != nil; tuple.attrs = tl tuple.attrs) {
-                sys->print("3\n");
                 attr := hd tuple.attrs;
-                if (attr.name == MAP) {
-                    sys->print("MAP\n");
+                if (attr.name == MAP)
                     continue;
-                }
 
-                sys->print("4\n");
                 m_name := attr.name;
                 m_ctxt := attr.value;
                 m_path := "";
@@ -54,10 +48,6 @@ build_map(): list of (string, Machine)
                 } else {
                     raise sys->sprint("config: missing '%s' machine", m_name);
                 }
-
-                sys->print("name: '%s'\n", m_name);
-                sys->print("ctxt: '%s'\n", m_ctxt);
-                sys->print("path: '%s'\n", m_path);
 
                 m := load Machine m_path;
                 m->init();

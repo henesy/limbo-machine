@@ -28,10 +28,9 @@ build: clean init $web/server.dis $web/sample.dis \
        $db/postgres.dis $db/binary.dis
     cp $web/dispatch.cfg $dis
 
-start:
+start-web:
     cd $dis
     server &
 
 stop:
-    kill -g Machine
     kill -g Server

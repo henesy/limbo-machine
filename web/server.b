@@ -21,9 +21,10 @@ init(nil: ref Draw->Context, args: list of string)
         raise "cannot announce connection";
 
     # machine := load Machine "http.dis";
-    # machine->init();
-    dispatch := load Machine "dispatch.dis";
-    dispatch->init();
+    machine := load Machine "sample.dis";
+    machine->init();
+    # dispatch := load Machine "dispatch.dis";
+    # dispatch->init();
 
     for (;;) {
         (ok, nc) := sys->listen(conn);
@@ -32,7 +33,7 @@ init(nil: ref Draw->Context, args: list of string)
 
         fd := sys->open(nc.dir + "/data", sys->ORDWR);
 
-        # spawn machine->service(fd);
-        spawn dispatch->service(fd);
+        spawn machine->service(fd);
+        # spawn dispatch->service(fd);
     }
 }
