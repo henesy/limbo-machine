@@ -1,0 +1,19 @@
+#summary Configure & dispatch Styx servers.
+#labels Phase-Design
+
+The idea is to have a single entry point for a number of Styx servers (e.g. {{{tcp!somehost!7777}}}, and then dispatch different paths to different Styx server implementations.
+
+A sample configuration might look as follows:
+{{{
+; cat dispatch.cfg
+map sample=/dummyfs
+map net=/net
+
+# server definitions
+sample=sample.dis
+net=redirect.dis path=/net
+}}}
+
+The component is in the design/development phase ([http://limbo-machine.googlecode.com/svn/trunk/web/dispatch.b here] is the current code).
+
+Comments are welcome.
