@@ -24,7 +24,7 @@ There are no binaries available yet for the Limbo Machine. This section describe
 {{{
 LoadModule lm_module modules/mod_lm_tunnel.so
 }}}
-    * set handler
+    * set a handler
 {{{
 <Location /styx>
     SetHandler lm-tunnel
