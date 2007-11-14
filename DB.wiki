@@ -1,13 +1,49 @@
-#summary The DB Driver Implementation Ideas.
+#summary Database API and PostgreSQL driver.
 #labels Featured,Phase-Requirements
 
-We can implement the DB FS:
+=== API Ideas ===
 
-/db/{tables,query,update}
+The application programming interface can be organized as the file system (e.g. as the networking in Inferno).
 
-There is a [http://witme.sourceforge.net/libferris.web/index.html libferris] project which can expose the postgresql DB as the file system. The linux journal article about libferris is available [http://www.linuxjournal.com/article/8901 here].
+{{{
+/db/         <-- DB API root
+    ctl      <-- API control file
+    /25/     <-- connection ID
+        data <-- connection data file
+}}}
 
-There are two ways to talk to the actual DB:
+A standard data encoding format (such as [http://www.vitanuova.com/inferno/man/6/json.html json], [http://www.vitanuova.com/inferno/man/6/sexprs.html symbolic expressions] or [http://www.vitanuova.com/inferno/man/6/ubfa.html ubfa]) can be used to talk to the service.
 
-  * Bridge between the Limbo module and the C DB driver (see limbo -T option)
-  * Native Limbo communication with the DB (for PostgreSQL database it has to be based on the [http://www.postgresql.org/docs/8.1/interactive/protocol.html PostgreSQL protocol])
+The following examples use JSON, but this is not necessarily the case.
+
+Connect to the database:
+{{{
+; echo '{"host":"localhost", "port":5432, "user":"u" "password":"p" "db":"db"}' > /db/ctl
+; cat /db/ctl
+{"connectionId":25}
+}}}
+
+Execute a query:
+{{{
+; echo '{"q":"select * from a"}' > /db/25/data
+; cat /db/25/data
+...
+}}}
+
+To speed up drivers development a bridge can be build between Limbo and existing C driver implementation (see limbo [http://www.vitanuova.com/inferno/man/1/limbo.html -T option]).
+
+==== Notes ====
+
+There is an ODBC Limbo API in Inferno: http://www.vitanuova.com/inferno/man/7/db.html.
+
+There is a [http://witme.sourceforge.net/libferris.web/index.html libferris] project which can expose the postgresql DB as the file system. A linux journal article on the subject can be found [http://www.linuxjournal.com/article/8901 here].
+
+OC found an existing postgres driver for Limbo on the [http://www.maht0x0r.net/inferno net]. Here are some problems I faced with it:
+  * Most probably Pg->PATH will not work for you
+  * Connection hangs when wrong pass/user/db specified
+  * Only plain password authentication can be used
+
+=== PostgreSQL Driver ===
+
+We are building our own PostgreSQL Limbo driver (because of a number of reasons). Here is the psql
+[http://www.postgresql.org/docs/8.1/interactive/protocol.html protocol] specification.
