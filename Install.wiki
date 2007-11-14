@@ -1,13 +1,27 @@
 #summary How to install and run the system.
 #labels Featured,Phase-Deploy
 
-In order to run the system, you need to [http://code.google.com/p/limbo-machine/source checkout the source code]. Please note that the code should be accessible from Inferno.
+There are no binaries for the Limbo Machine yet. Please use the  [http://code.google.com/p/limbo-machine/source source] code as described below.
 
-  * Start Inferno
-  $ emu
+  * Checkout the trunk as described [http://code.google.com/p/limbo-machine/source here] (limbo-machine should be accessible from Inferno)
+  * Start the emu
+{{{
+$ emu
+}}}
   * Go to the limbo-machine directory
-  * Build and run the server program
-  ; mk clean build start
-  * Then open a browser (firefox is the only supported browser as for now) on your native OS and go to {{{file://<limbo.machine.home>/js/sample.html}}}
-  * To stop the system
-  ; mk stop
+  * Build everything
+{{{
+; mk clean build
+}}}
+  * Run the web server
+{{{
+; mk start-web
+}}}
+  Currently it will run a [http://limbo-machine.googlecode.com/svn/trunk/web/sample.b sample] Styx server, which cannot be accessed through HTTP. Please use [ModLM] or uncomment the http.dis machine in web/server.b. [Dispatch] is on the way and it should make things easier.
+  * Then open a browser (firefox is the only supported browser as for now) and go to {{{file://<limbo.machine.home>/js/sample.html}}}
+  * To stop the system use
+{{{
+; mk stop
+}}}
+
+ModLM build instructions can be found [ModLM here].
