@@ -1,21 +1,19 @@
-#summary The JavaScript Styx Implementation.
+#summary Styx client library written in the JavaScript.
 #labels Phase-Implementation
 
-== Introduction ==
+Styx client programs run in user browsers and talk to Styx servers over HTTP(S). The corresponding web server (e.g. [ModLM]) decodes Styx messages and transmits them to the Styx server and back (encoding them before sending to the client).
 
-The JavaScript module consists of the following components:
+If you don't know what is a Styx client and server you can start with:
+  * http://www.vitanuova.com/inferno/papers/styx.html
+  * http://www.vitanuova.com/inferno/man/5/0intro.html
 
-  * styx-fs.js -- high level interface to the Styx protocol
-  * styx.js -- Styx protocol implementation
-  * connection.js -- low level communication
-  * message.js -- binary data message
-  * types.js -- type definitions and constants
+... imagine you have a remote FS mounted to your browser and a simple API to access it.
 
-Currently, Firefox is the only browser supported. More browsers will be supported in the future.
+Firefox is the only browser supported at the moment. We will port the library to other browsers in the future.
 
 == High Level Interface ==
 
-Consider the following code snippet:
+Consider the following code snippet in JavaScript (e.g. some HTML page):
 {{{
 var fs = new StyxFS("/styx", ehandler);
 fs.mount("someone", "/net");
@@ -31,6 +29,18 @@ msg = new Message(fs.read(dns, 0, 16));
 var ip = msg.getString(0);
 }}}
 
+There is also a working [http://limbo-machine.googlecode.com/svn/trunk/js/sample.html example], which is able to connect to a dummy Styx server and list the root directory contents.
+
 == Implementation ==
+
+The JavaScript module consists of the following components:
+
+  * styx-fs.js -- high level interface to the Styx protocol
+  * styx.js -- Styx protocol implementation
+  * connection.js -- low level communication
+  * message.js -- binary data message
+  * types.js -- type definitions and constants
+
+Connection uses [http://www.w3.org/TR/XMLHttpRequest XMLHttpRequest] object to implement the actual data exchange.
 
 TBD
