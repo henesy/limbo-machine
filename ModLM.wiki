@@ -1,4 +1,5 @@
 #summary Apache HTTPD module for the Styx message forwarding.
+#labels Phase-Implementation
 
 === Introduction ===
 
@@ -19,11 +20,11 @@ There are no binaries available yet for the Limbo Machine. This section describe
   * cd /path/to/limbo-machine
   * apxs -llibhttpd -llibapr-1 -llibaprutil-1 -ci mod_lm_tunnel.c
   * edit apache config:
-    * add the LoadModule directive:
+    * load the module:
 {{{
 LoadModule lm_module modules/mod_lm_tunnel.so
 }}}
-    * set the 'lm-tunnel' handler
+    * set handler
 {{{
 <Location /styx>
     SetHandler lm-tunnel
