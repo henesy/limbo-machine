@@ -1,5 +1,5 @@
 #summary Styx client library written in the JavaScript.
-#labels Phase-Implementation
+#labels Phase-Implementation,Featured
 
 The idea is that the client programs (run in user browsers) talk to the Styx servers over HTTP(S). The corresponding web server (e.g. [ModLM]) decodes Styx messages and transmits them to the Styx server and back (encoding them before sending to the client).
 
