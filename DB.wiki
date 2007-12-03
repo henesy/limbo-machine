@@ -1,7 +1,7 @@
 #summary Database API and PostgreSQL driver.
 #labels Featured,Phase-Requirements
 
-=== API Ideas ===
+=== API ===
 
 The application programming interface can be organized as the file system (e.g. as the networking in Inferno).
 
@@ -34,7 +34,7 @@ To speed up drivers development a bridge can be build between Limbo and existing
 
 ==== Notes ====
 
-There is an ODBC Limbo API in Inferno: http://www.vitanuova.com/inferno/man/7/db.html.
+There is an ODBC [http://www.vitanuova.com/inferno/man/7/db.html API] and [http://www.vitanuova.com/inferno/man/10/odbc.html file server for windows] available. The DB interface described here will provide a platform independent solution.
 
 There is a [http://witme.sourceforge.net/libferris.web/index.html libferris] project which can expose the postgresql DB as the file system. A linux journal article on the subject can be found [http://www.linuxjournal.com/article/8901 here].
 
