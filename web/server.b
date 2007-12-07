@@ -21,7 +21,8 @@ init(nil: ref Draw->Context, args: list of string)
         raise "cannot announce connection";
 
     # machine := load Machine "http.dis";
-    machine := load Machine "sample.dis";
+    # machine := load Machine "sample.dis";
+    machine := load Machine "export.dis";
     machine->init();
     # dispatch := load Machine "dispatch.dis";
     # dispatch->init();

@@ -9,8 +9,9 @@
 base = `pwd`
 dis = $base/dis
 web = $base/web
+module = $base/module
 db = $base/db
-flags = -gw
+flags = -gw -I$module
 
 init:
     mkdir $dis
@@ -24,13 +25,17 @@ clean:
     mv $stem.dis $stem.sbl $dis
 
 build: clean init $web/server.dis $web/sample.dis \
-       $web/http.dis $web/dispatch.dis \
-       $db/postgres.dis $db/binary.dis
+       $web/http.dis $web/dispatch.dis $web/export.dis \
+       $db/postgres.dis $db/binary.dis $db/server.dis
     cp $web/dispatch.cfg $dis
 
 start-web:
     cd $dis
     server &
+
+start-db:
+    cd $dis
+    listen -A 'tcp!*!7778' server.dis
 
 stop:
     kill -g Server
