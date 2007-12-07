@@ -17,7 +17,7 @@ The module was tested with httpd-2.2.6 only.
 There are no binaries available yet for the Limbo Machine. This section describes how to build and install the module from source. You will need the APXS ([http://httpd.apache.org/docs/2.2/programs/apxs.html APache eXtenSion]) tool to build the module. You can find the windows version of APXS [http://www.apachelounge.com/download here].
 
   * *svn co* as described [http://code.google.com/p/limbo-machine/source here]
-  * cd /path/to/limbo-machine
+  * cd /path/to/limbo-machine/web/c
   * apxs -llibhttpd -llibapr-1 -llibaprutil-1 -ci mod_lm_tunnel.c
   * edit apache config:
     * load the module:
