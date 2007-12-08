@@ -1,41 +1,43 @@
-# start server: mk start
-# stop server: mk stop
-# clean: mk clean
-# build: mk build
+BASE = `pwd`
+FLAGS = -gw -I$BASE/module
+DEST = $BASE/dis
 
-# mount: mount -A tcp!localhost!7777 mnt
-# unmount: unmount mnt
+WEB = \
+    web/limbo/server.dis \
+    web/limbo/sample.dis \
+    web/limbo/http.dis \
+    web/limbo/dispatch.dis \
 
-base = `pwd`
-dis = $base/dis
-web = $base/web
-module = $base/module
-db = $base/db
-flags = -gw -I$module
+DB = \
+    db/server.dis \
+    db/postgres.dis \
+    db/binary.dis \
+
+ALL = ${DB:%=$DEST/%} ${WEB:%=$DEST/%}
+
 
 init:
-    mkdir $dis
+    mkdir -p $DEST/web/limbo
+    mkdir -p $DEST/db
 
 clean:
-    rm -rf $dis
-    rm -f $base/*.dis $base/*.sbl
+    rm -rf $DEST
+    rm -f *.dis *.sbl */*.dis */*.sbl
 
 %.dis: %.b 
-    limbo $flags -o $stem.dis $stem.b 
-    mv $stem.dis $stem.sbl $dis
+    limbo $FLAGS -o $stem.dis $stem.b 
 
-build: clean init $web/server.dis $web/sample.dis \
-       $web/http.dis $web/dispatch.dis $web/export.dis \
-       $db/postgres.dis $db/binary.dis $db/server.dis
-    cp $web/dispatch.cfg $dis
+compile:N: clean init $WEB $DB
 
-start-web:
-    cd $dis
-    server &
+$DEST/%.dis: %.dis
+    mv $prereq $target
+    mv $stem.sbl $DEST/$stem.sbl
 
-start-db:
-    cd $dis
-    listen -A 'tcp!*!7778' server.dis
+install:N: $ALL
 
-stop:
-    kill -g Server
+# pkg: compile
+#     puttar < $WEB $DB > pkg.tar
+#     mkdir /db
+#     tarfs pkg.tar /db
+
+all:N: compile install

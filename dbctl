@@ -1,0 +1,32 @@
+#!/dis/sh.dis -n
+load std
+load arg
+pctl newpgrp
+
+fn usage {
+    echo 'usage:' $cmd '[-p <port>] [start | stop | mount <mountpoint>]'
+}
+
+port = 7777
+(arg
+    p+  {port = $arg}
+    '*' {echo unknown option $opt}
+    -   $*
+)
+
+cmd = $0;
+mnt = $2;
+if {~ $1 'start'} {
+    styxlisten -A 'tcp!*!'^$port dis/db/server
+} {~ $1 'mount'} {
+    if {no $2} {
+        {usage}
+        exit
+    }
+
+    mount -A {dis/db/server} $2
+} {~ $1 'stop'} {
+    kill -g Db
+} {
+    {usage}
+}
