@@ -14,7 +14,7 @@ Postgres: module {
 };
 
 # Please make sure that CS is running (; ndb/cs)
-init(nil: ref Draw->Context, argv: list of string)
+init(nil: ref Draw->Context, nil: list of string)
 {
     sys = load Sys Sys->PATH;
     bin = load Binary "binary.dis";

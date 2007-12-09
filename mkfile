@@ -12,6 +12,7 @@ DB = \
     db/server.dis \
     db/postgres.dis \
     db/binary.dis \
+    db/ctl.dis \
 
 ALL = ${DB:%=$DEST/%} ${WEB:%=$DEST/%}
 
