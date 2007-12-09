@@ -9,7 +9,16 @@ If you don't know what is a Styx client and server you can start with:
 
 ... imagine you have a remote FS mounted to your browser and a simple API to access it.
 
-Firefox is the only browser supported at the moment. We will port the library to other browsers in the future.
+Browser support matrix:
+|| *Browser* || *Version* || *Supported?* ||
+|| Firefox || 2 || yes ||
+|| Safari || 3 || yes ||
+|| Internet Explorer || 6 || not yet ||
+|| Internet Explorer || 7 || not yet ||
+|| Opera || ? || ? ||
+
+
+We will port the library to other browsers in the future.
 
 == High Level Interface ==
 
