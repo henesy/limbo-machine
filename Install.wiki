@@ -3,25 +3,31 @@
 
 There are no binaries for the Limbo Machine yet. Please use the  [http://code.google.com/p/limbo-machine/source source] code as described below.
 
-  * Checkout the trunk as described [http://code.google.com/p/limbo-machine/source here] (limbo-machine should be accessible from Inferno)
-  * Start the emu
+  * Checkout the trunk as described [http://code.google.com/p/limbo-machine/source here] (limbo-machine directory should be accessible from Inferno)
+  * Start emu
 {{{
 $ emu
 }}}
   * Go to the limbo-machine directory
   * Build everything
 {{{
-; mk clean build
+; mk clean all
 }}}
-  * Run the web server
+  * You can also build a [JS styx.js] file.
 {{{
-; mk start-web
-}}}
-  Currently it will run a [http://limbo-machine.googlecode.com/svn/trunk/web/sample.b sample] Styx server, which cannot be accessed through HTTP. Please use [ModLM] or uncomment the http.dis machine in web/server.b. [Dispatch] is on the way and it should make things easier.
-  * Then open a browser (firefox is the only supported browser as for now) and go to {{{file://<limbo.machine.home>/js/sample.html}}}
-  * To stop the system use
-{{{
-; mk stop
+; mk styx.js
 }}}
 
-ModLM build instructions can be found [ModLM here].
+====DB====
+There is a dbctl script which can mount the [DB] service:
+{{{
+; /path/to/limbo-machine/dbctl
+}}}
+will print the usage info:
+  * _dbctl start_ - starts the db service on the default port
+  * _dbctl -p <port> start_ - starts the db service on a given port
+  * _dbctl stop_ - stops the db service
+  * _dbctl mount <mountpoint>_ - mounts the db service to a given directory
+
+====Web====
+Please refer to [ModLM] on how to build and run a sample web application.
