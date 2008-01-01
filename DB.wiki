@@ -3,7 +3,7 @@
 
 === API ===
 
-The application programming interface can be organized as the file system (e.g. as the networking in Inferno).
+The [DBAPI application programming interface] is organized as the file system (e.g. as the networking in Inferno).
 
 {{{
 /db/         <-- DB API root
@@ -45,5 +45,4 @@ OC found an existing postgres driver for Limbo on the [http://www.maht0x0r.net/i
 
 === PostgreSQL Driver ===
 
-We are building our own PostgreSQL Limbo driver (because of a number of reasons). Here is the psql
-[http://www.postgresql.org/docs/8.1/interactive/protocol.html protocol] specification.
+We are building our own PostgreSQL driver for Limbo. Here is the psql [http://www.postgresql.org/docs/8.1/interactive/protocol.html protocol] specification.
