@@ -12,7 +12,7 @@ This module acts as a gateway between the [JS JavaScript] Styx protocol implemen
 
 === Installation ===
 
-There are no binaries yet for the Limbo Machine. This section describes how to build and install the module from source. You will need [http://httpd.apache.org Apache2] and APXS ([http://httpd.apache.org/docs/2.2/programs/apxs.html APache eXtenSion] tool) to build the module. (A windows version of the APXS can be found [http://www.apachelounge.com/download here].)
+There are no binaries yet for the Limbo Machine. This section describes how to build and install the module from source. You will need [http://httpd.apache.org Apache2] and APXS ([http://httpd.apache.org/docs/2.2/programs/apxs.html APache eXtenSion] tool) to build the module. (Windows version of the APXS can be found [http://www.apachelounge.com/download here].)
 
   * *svn co* as described [http://code.google.com/p/limbo-machine/source here]
   * cd /path/to/limbo-machine/web/apache
