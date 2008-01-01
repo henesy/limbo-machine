@@ -1,7 +1,7 @@
 #summary Styx client library written in the JavaScript.
 #labels Phase-Implementation,Featured
 
-The idea is that the client programs (run in user browsers) talk to the Styx servers over HTTP(S). The corresponding web server (e.g. [ModLM]) decodes Styx messages and transmits them to the Styx server and back (encoding them before sending to the client).
+Web applications can use this library to connect to remote Styx servers right from the browser and talk Styx or 9P over HTTP(S). The corresponding web server (e.g. [ModLM]) transmits Styx messages to the server and back handling the necessary encoding.
 
 If you don't know what is a Styx client and server you can start with:
   * http://www.vitanuova.com/inferno/papers/styx.html
@@ -16,7 +16,6 @@ Browser support matrix:
 || Internet Explorer || 6 || not yet ||
 || Internet Explorer || 7 || not yet ||
 || Opera || ? || ? ||
-
 
 We will port the library to other browsers in the future.
 
@@ -38,14 +37,14 @@ msg = new Message(fs.read(dns, 0, 16));
 var ip = msg.getString(0);
 }}}
 
-There is also a working [http://limbo-machine.googlecode.com/svn/trunk/js/sample.html example], which is able to connect to a dummy Styx server and list the root directory contents.
+There is also a working [http://limbo-machine.googlecode.com/svn/trunk/web/js/sample.html example], which is able to connect to some Styx server and list the root directory contents. [ModLM] page describes how to install and run the sample application.
 
 == Implementation ==
 
 The JavaScript module consists of the following components:
 
   * styx-fs.js -- high level interface to the Styx protocol
-  * styx.js -- Styx protocol implementation
+  * styx-protocol.js -- Styx protocol implementation
   * connection.js -- low level communication
   * message.js -- binary data message
   * types.js -- type definitions and constants

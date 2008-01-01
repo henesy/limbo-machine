@@ -14,6 +14,8 @@ sample=sample.dis
 net=redirect.dis path=/net
 }}}
 
-The component is in the design/development phase ([http://limbo-machine.googlecode.com/svn/trunk/web/dispatch.b here] is the current code).
+You can find the sketch in web/limbo source directory.
+
+*nsbuild(1)* can do the similar job, so it is now questionable whether we need this module or not.
 
 Comments are welcome.
