@@ -76,7 +76,7 @@ request(fd: ref Sys->FD): Request
         # empty body
     }
 
-    (hlen, hlines) := sys->tokenize(string buf[0:idx], "\r\n");
+    (nil, hlines) := sys->tokenize(string buf[0:idx], "\r\n");
     request := hd hlines;
     clen := 0;
 

@@ -13,10 +13,10 @@ init()
     cfg = load Cfg Cfg->PATH;
     cfg->init("dispatch.cfg");
 
-    machines := build_map();
+    build_map();
 }
 
-service(fd : ref Sys->FD)
+service(nil : ref Sys->FD)
 {
     # do the redirects
 }
