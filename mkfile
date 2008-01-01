@@ -2,6 +2,13 @@ BASE = `pwd`
 FLAGS = -gw -I$BASE/module
 DEST = $BASE/dis
 
+JS = \
+    web/js/types.js \
+    web/js/message.js \
+    web/js/connection.js \
+    web/js/styx-protocol.js \
+    web/js/styx-fs.js \
+
 WEB = \
     web/limbo/server.dis \
     web/limbo/sample.dis \
@@ -19,6 +26,7 @@ ALL = ${DB:%=$DEST/%} ${WEB:%=$DEST/%}
 
 init:
     mkdir -p $DEST/web/limbo
+    mkdir -p $DEST/web/js
     mkdir -p $DEST/db
 
 clean:
@@ -42,3 +50,7 @@ install:N: $ALL
 #     tarfs pkg.tar /db
 
 all:N: compile install
+
+styx.js: init
+    cat $JS > $DEST/web/js/styx.js
+    cp web/js/sample.html  $DEST/web/js
