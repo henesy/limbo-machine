@@ -9,7 +9,6 @@ Connection = function(service, onerror) {
 }
 
 Connection.prototype.tx = function(imsg) {
-    netscape.security.PrivilegeManager.enablePrivilege("UniversalBrowserRead");
     this.req.open("POST", this.service, false);
     this.req.overrideMimeType("text/plain; charset=x-user-defined");
     this.req.send(marshall(imsg.getBytes()));
