@@ -1,9 +1,9 @@
 #summary Database API and PostgreSQL driver.
 #labels Featured,Phase-Requirements
 
-=== API ===
+=== Overview ===
 
-The [DBAPI application programming interface] is organized as the file system (e.g. as the networking in Inferno).
+The application programming interface is organized as the file system (e.g. as the networking in Inferno).
 
 {{{
 /db/         <-- DB API root
@@ -18,9 +18,9 @@ The following examples use JSON, but this is not necessarily the case.
 
 Connect to the database:
 {{{
-; echo '{"host":"localhost", "port":5432, "user":"u" "password":"p" "db":"db"}' > /db/ctl
+; echo '{"type":"connect", "addr":"tcp!localhost!7777", "user":"u" "passwd":"p"}' > /db/ctl
 ; cat /db/ctl
-{"connectionId":25}
+{"type":"connect", "id":25}
 }}}
 
 Execute a query:
@@ -30,9 +30,9 @@ Execute a query:
 ...
 }}}
 
-To speed up drivers development a bridge can be build between Limbo and existing C driver implementation (see limbo [http://www.vitanuova.com/inferno/man/1/limbo.html -T option]).
-
 ==== Notes ====
+
+To speed up drivers development a bridge can be build between Limbo and existing C driver implementation (see limbo [http://www.vitanuova.com/inferno/man/1/limbo.html -T option]).
 
 There is an ODBC [http://www.vitanuova.com/inferno/man/7/db.html API] and [http://www.vitanuova.com/inferno/man/10/odbc.html file server for windows] available. The DB interface described here will provide a platform independent solution.
 
@@ -46,3 +46,16 @@ OC found an existing postgres driver for Limbo on the [http://www.maht0x0r.net/i
 === PostgreSQL Driver ===
 
 We are building our own PostgreSQL driver for Limbo. Here is the psql [http://www.postgresql.org/docs/8.1/interactive/protocol.html protocol] specification.
+
+=== API ===
+
+Connect:
+{{{
+-> {"type":"connect", "addr":"tcp!localhost!5432", "user":"username", "passwd":"password"}
+<- {"type":"connect", "id":25}
+}}}
+
+Error:
+{{{
+<- {"type":"error", "msg":"error message"}
+}}}
