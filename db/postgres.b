@@ -23,9 +23,30 @@ init(nil: ref Draw->Context, nil: list of string)
     if (ok < 0)
         raise "failed:dial";
 
-    fd := sys->open(conn.dir + "/data", sys->ORDWR);
-    spawn read(fd);
+    rdb := chan of ref Msg;
+    wdb := chan of ref Msg;
 
+    fd := sys->open(conn.dir + "/data", sys->ORDWR);
+
+    spawn read(rdb, fd);
+    spawn write(wdb, fd);
+
+    s1 := chan of ref Msg;
+    r1 := rdb;
+    s2 := chan of ref Msg;
+    r2 := s1;
+    s3 := chan of ref Msg;
+    r3 := s2;
+    
+    spawn pparamstat(s1, r1);
+    spawn perror(s2, r2);
+    spawn pauthresp(s3, r3);
+    spawn punknown(s3);
+
+    urchan := chan of string;
+    uwchan := chan of string;
+
+    # user interaction
     # connect message
     msg := bin->new(nil);
     msg.add_32(0); # length of a message, change it
@@ -38,10 +59,7 @@ init(nil: ref Draw->Context, nil: list of string)
     msg.add_8(0);
     msg.set_32(35, 0); # adjust the message size field
 
-    sys->write(fd, msg.bytes, len msg.bytes);
-    sys->print("Establishing a connection...\n");
-
-    sys->sleep(1000);
+    wdb <-= msg;
 
     # send a simple query
     # msg = bin->new(nil);
@@ -51,83 +69,102 @@ init(nil: ref Draw->Context, nil: list of string)
     # msg.set_32(len msg.bytes - 1, 1);
     # sys->write(fd, msg.bytes, len msg.bytes);
     # sys->print("Sending a query...\n");
-    
-    sys->sleep(2000);
+
+    status <-= x;
 }
 
-read(fd: ref Sys->FD) 
+write(db: chan of ref Msg, fd: ref Sys->FD)
 {
-    ok := 1;
-    buf := array[1] of byte;
-    while (ok > 0) {
-         m := bin->read_msg(sys, fd);
-         sys->print("mtype: %s, len: %d\n", char_as_str(m, 0), len m.bytes);
- 
-         pauthresp(m);
-         perror(m);
-         pparamstat(m);
+    for (;;) {
+        m := <- db;
+        sys->write(fd, m.bytes, len m.bytes);
     }
 }
 
-pparamstat(m: ref Msg)
+read(db: chan of ref Msg, fd: ref Sys->FD) 
 {
-    if (m.get_8(0) == 'S') {
-        key := m.get_string(5);
-        value := m.get_string(5 + len(key) + 1);
-        sys->print("%s: %s\n", key, value);
-    }
+    for (;;)
+        db <-= bin->read_msg(sys, fd);
 }
 
-pauthresp(m: ref Msg)
+pparamstat(send: chan of ref Msg, recv: chan of ref Msg)
 {
-    if (m.get_8(0) == 'R') {
-        code := m.get_32(1);
-
-        sys->print("CODE: %d\n", code);
-        sys->print("VAL: %d\n", m.get_8(8));
-
-        case (code) {
-            8 =>
-                value := m.get_32(5);
-                sys->print("VAL: %d\n", value);
-                case (value) {
-                    0 =>
-                        sys->print("connection successful\n");
-                    2 =>
-                        sys->print("kerberos required\n");
-                    3 =>
-                        sys->print("clear text password required\n");
-                    6 =>
-                        sys->print("SCM credentials required\n");
-                    * =>
-                        sys->print("unknown response value: %d\n", value);
-                }
-            10 =>
-                value := m.get_32(5);
-                salt := m.bytes[9:];
-                sys->print("crypt() encryption password required\n");
-            12 =>
-                value := m.get_32(5);
-                salt := m.bytes[9:];
-                sys->print("MD5-encrypted password required\n");
-            * =>
-                sys->print("unknown code\n");
+    for (;;) {
+        m := <-recv;
+        if (m.get_8(0) == 'S') {
+            key := m.get_string(5);
+            value := m.get_string(5 + len(key) + 1);
+            sys->print("%s: %s\n", key, value);
+        } else {
+            send <-= m;
         }
     }
 }
 
-perror(m: ref Msg)
+pauthresp(send: chan of ref Msg, recv: chan of ref Msg)
 {
-    if (m.get_8(0) == 'E') {
-        idx := 5;
-        length := len m.bytes;
-        tcode : int;
-        while (idx < length && (tcode = m.get_8(idx)) != 0) {
-#                 tcode := m.get_8(idx);
-            str := m.get_string(++idx);
-            sys->print("type: %s, value: %s\n", int_as_str(tcode), str);
-            idx += 1 + len str;
+    for (;;) {
+        m := <-recv;
+        if (m.get_8(0) == 'R') {
+            code := m.get_32(1);
+
+            case (code) {
+                8 =>
+                    value := m.get_32(5);
+                    case (value) {
+                        0 =>
+                            sys->print("connection successful\n");
+                        2 =>
+                            sys->print("kerberos required\n");
+                        3 =>
+                            sys->print("clear text password required\n");
+                        6 =>
+                            sys->print("SCM credentials required\n");
+                        * =>
+                            sys->print("unknown response value: %d\n", value);
+                    }
+                10 =>
+                    value := m.get_32(5);
+                    salt := m.bytes[9:];
+                    sys->print("crypt() encryption password required\n");
+                12 =>
+                    value := m.get_32(5);
+                    salt := m.bytes[9:];
+                    sys->print("MD5-encrypted password required\n");
+                * =>
+                    sys->print("unknown code\n");
+            }
+        } else {
+            send <-= m;
         }
+    }
+}
+
+perror(send: chan of ref Msg, recv: chan of ref Msg)
+{
+    for (;;) {
+        m := <-recv;
+        if (m.get_8(0) == 'E') {
+            idx := 5;
+            length := len m.bytes;
+            tcode : int;
+            while (idx < length && (tcode = m.get_8(idx)) != 0) {
+                str := m.get_string(++idx);
+                sys->print("type: %s, value: %s\n", int_as_str(tcode), str);
+                idx += 1 + len str;
+            }
+        } else {
+            send <-= m;
+        }
+    }
+}
+
+punknown(recv: chan of ref Msg)
+{
+    for (;;) {
+        m := <-recv;
+        sys->print("unknown msg: %s, len: %d\n",
+            char_as_str(m, 0), len m.bytes);
     }
 }
         
