@@ -2,8 +2,9 @@ Binary: module {
     new: fn(src: array of byte): ref Msg;
     # This is a psql specific method
     read_msg: fn(sys: Sys, fd: ref Sys->FD): ref Msg;
-    read_fully: fn(sys: Sys, fd: ref Sys->FD, buf: array of byte);
     
+
+    # TODO: get_* with no arguments (auto-incrementing the size)
     Msg: adt {
         bytes: array of byte;
 

@@ -12,37 +12,27 @@ new(src: array of byte): ref Msg
     }
 }
 
+# TODO: handle sys->readn() non-positive response codes (errors)
 read_msg(sys: Sys, fd: ref Sys->FD): ref Msg
 {
     sz_buf := array[5] of byte;
-    read_fully(sys, fd, sz_buf);
+    sys->readn(fd, sz_buf, len sz_buf);
 
     sz := new(sz_buf[1:]).get_32(0);
 
-    buf := array[sz - (len sz_buf) + 1] of byte;
-    read_fully(sys, fd, buf);
-    
-    # TODO: read_fully with offsets instead
-    res := array[sz + 1] of byte;
-    for (i := 0; i < sz; i++) {
-        if (i < len sz_buf) {
-            res[i] = sz_buf[i];
-        } else {
-            res[i] = buf[i - (len sz_buf)];
-        }
-    }
-    
-    return new(res);
-}
+    buf := array[sz - 4] of byte;
+    sys->readn(fd, buf, len buf);
 
-read_fully(sys: Sys, fd: ref Sys->FD, buf: array of byte)
-{
-    off := 0;
-    sz := len buf;
-    for (read := sys->pread(fd, buf, sz, big off); read < sz - off;) {
-        off += read;
-        read = sys->pread(fd, buf, sz - off, big off);
-    }
+    res := array[sz + 1] of byte;
+
+    i := 0;
+    for (; i < len sz_buf; i++)
+        res[i] = sz_buf[i];
+
+    for (; i < len res; i++)
+        res[i] = buf[i - len(sz_buf)];
+
+    return new(res);
 }
 
 Msg.set_8(m: self ref Msg, val, idx: int)
