@@ -69,8 +69,6 @@ init(nil: ref Draw->Context, nil: list of string)
     # msg.set_32(len msg.bytes - 1, 1);
     # sys->write(fd, msg.bytes, len msg.bytes);
     # sys->print("Sending a query...\n");
-
-    status <-= x;
 }
 
 write(db: chan of ref Msg, fd: ref Sys->FD)
