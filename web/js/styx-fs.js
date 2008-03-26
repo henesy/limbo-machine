@@ -1,7 +1,7 @@
 // I T Name
 // + - mount(user, path): root
 // + - unmount()
-// + - create
+// + - create(path, perm, mode): resource
 // + - open
 // + - read
 // + - write
