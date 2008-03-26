@@ -1,0 +1,35 @@
+#!/dis/sh.dis -n
+
+load std
+load file2chan
+
+# File2chan
+#
+# nl = "{echo}
+# rbuf = '/shells v0.0.1' ^ "{echo}
+# fn run {
+#     cmd = $1;
+#     rbuf = $rbuf ^ "{echo -n '; ' ^ $cmd} ^ "{sh -c $cmd}
+# }
+# file2chan ./sh {rreadone $rbuf} {run ${rget data}}
+# styxlisten -A 'tcp!*!7770' export ./
+
+# A different way
+#
+ndb/cs
+listen -A 'tcp!*!7771' sh
+dial -A 'tcp!localhost!7771' {
+    styxlisten -A 'tcp!*!7777' export $net
+}
+
+# listen -A 'tcp!*!7770' listener
+# styxlisten -A 'tcp!*!7770' export /
+# fn listener {
+#     echo connection from `{cat $net/remote} >[1=2]
+#     getlines {handle $line}
+# }
+# 
+# fn handle {
+#     # sh -c ${unquote $line}
+#     echo 'GOT LINE: $line'
+# }

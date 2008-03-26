@@ -1,0 +1,156 @@
+<html>
+<head>
+<title>Test Page</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"></meta>
+<script type="text/javascript" src="../types.js"></script>
+<script type="text/javascript" src="../message.js"></script>
+<script type="text/javascript" src="../connection.js"></script>
+<script type="text/javascript" src="../styx-protocol.js"></script>
+<script type="text/javascript" src="../styx-fs.js"></script>
+
+<script type="text/javascript">
+var fs = null;
+var sh = null;
+var err = false;
+var offset = 0;
+
+var State = {
+    INIT:  1,
+    READY: 2,
+    NOOP:  4
+};
+
+function toggle(s) {
+    switch (s) {
+        case State.READY:
+            e("service").disabled = "true";
+            e("mount").disabled = "true";
+            e("unmount").disabled = "";
+            e("in").disabled = "";
+            e("in").focus();
+            break;
+        case State.INIT:
+            e("service").disabled = "";
+            e("service").value = "/styx";
+            e("mount").disabled = "";
+            e("mount").focus();
+            e("unmount").disabled = "true";
+            e("in").disabled = "true";
+            break;
+        case State.NOOP:
+            e("service").disabled = "true";
+            e("mount").disabled = "true";
+            e("unmount").disabled = "true";
+            e("in").disabled = "true";
+           break;
+        default:
+            onerror('unknown state');
+    }
+}
+
+function mount() {
+    fs = new StyxFS(e("service").value, onerror);
+
+    fs.mount("ostap", "/");
+    if (!err) {
+        sh = fs.open("/data", Mode.ORDWR);
+        if (!err)
+            toggle(State.READY);
+    }
+}
+
+function unmount() {
+    if (fs != null) {
+        if (sh != null)
+            fs.close(sh);
+        fs.unmount();
+    }
+
+    toggle(State.INIT);
+}
+
+function onerror(msg) {
+    alert("'" + msg + "'");
+    err = true;
+}
+
+function run(evt) {
+    if (evt.keyCode != 13)
+        return;
+
+    toggle(State.NOOP);
+
+    var out = e("out&err");
+    var cmd = e("in");
+    out.innerHTML += "; " + cmd.value + "<br/>";
+
+    /*
+    fs.write(res, 0, cmd.value);
+    var res = fs.read(res, offset, 1024);
+    offset += res.length;
+    out.innerHTML += offset;
+    */
+
+    cmd.value = "";
+    toggle(State.READY);
+}
+
+function e(id) { return document.getElementById(id); }
+</script>
+<style type="text/css">
+div.shell {
+    width: 80%;
+    height: 80%;
+    font-family: courier;
+    font-size: 14px;
+}
+div.outnerr {
+    width: 100%;
+    height: 80%;
+    vertical-align: top;
+    color: green;
+}
+div.input {
+    width: 100%;
+    height: 5%;
+    vertical-align: top;
+}
+</style>
+</head>
+
+<body onload="toggle(State.INIT)" onunload="unmount()">
+    <!-- div style="width:50%;height:33%;margin-left:50%;vertical-align:middle">
+        right top
+    </div>
+    <div style="height:33%;width:50%;vertical-align:middle">left</div>
+    <div style="width:50%;height:34%;margin-left:50%;vertical-align:middle">
+        right bottom
+    </div -->
+
+    <input id="service" type="text" size="12"/>&nbsp;
+    <input id="mount" type="button" value="Mount" onclick="mount()"/>&nbsp;
+    <input id="unmount" type="button" value="Unmount" onclick="unmount()"/>
+
+    <br/><br/>
+
+    <div id="shell" class="shell">
+        <div id="out&err" class="outnerr"></div>
+        <div class="input">
+            <input id="in" style="width:100%"
+                   onkeydown="return run(event)"></input>
+        </div>
+    </div>
+
+    <!-- table id="shell" style="width:80%;height:80%">
+        <tr style="vertical-align:top;width:100%;height:100%">
+            <td><div id="out&err"/></td>
+        </tr> 
+        <tr style="vertical-align:top;width:100%">
+            <td>
+                <input id="in" style="width:100%"
+                       onkeydown="return run(event)"></input>
+            </td>
+        </tr>
+    </table -->
+</body>
+</html>
