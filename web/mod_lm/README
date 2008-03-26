@@ -12,12 +12,12 @@ Client   Apache   Inferno
 | <-7--- |        |
 
 1) a client issues http get request to mod_lm_session manager 
-   (http[s]://server/styx) to obtain a session (and possibly pass
+   (http[s]://server/m) to obtain a session (and possibly pass
    some configuration parameters (the server name, port to connect to))
 2) session manager checks for max connections + other constraints and either
    proceeds or rejects incomming connection
 3) session manager creates a tcp connection to inferno process (server)
-4) a client issues an http post (http[s]://server/styx/cafebabe)
+4) a client issues an http post (http[s]://server/m/cafebabe)
    and mounts the system
 5) if the connection between client and apache was droped then a different
    http post with the same sessio id (cafebabe) will continue the same

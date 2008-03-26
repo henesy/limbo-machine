@@ -10,10 +10,7 @@ JS = \
     web/js/styx-fs.js \
 
 WEB = \
-    web/limbo/server.dis \
-    web/limbo/sample.dis \
-    web/limbo/http.dis \
-    web/limbo/dispatch.dis \
+    web/examples/http.dis \
 
 DB = \
     db/server.dis \
@@ -23,9 +20,10 @@ DB = \
 
 ALL = ${DB:%=$DEST/%} ${WEB:%=$DEST/%}
 
+all:N: compile install
 
 init:
-    mkdir -p $DEST/web/limbo
+    mkdir -p $DEST/web/examples
     mkdir -p $DEST/web/js
     mkdir -p $DEST/db
 
@@ -49,8 +47,5 @@ install:N: $ALL
 #     mkdir /db
 #     tarfs pkg.tar /db
 
-all:N: compile install
-
 styx.js: init
     cat $JS > $DEST/web/js/styx.js
-    cp web/js/sample.html  $DEST/web/js
