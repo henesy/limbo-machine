@@ -1,21 +1,24 @@
-implement Machine;
+implement Http;
 
+include "draw.m";
 include "sys.m";
     sys: Sys;
 include "string.m";
     str: String;
-# include "hash.m";
-#     hash: Hash;
 
-include "../module/machine.m";
-    sample: Machine;
+# include "../module/machine.m";
+#     sample: Machine;
 
-Request: adt {
-    request: string;
-    # headers: ref HashTable; 
-    headers: list of array of string;
-    body: array of byte;
-    str: fn(s: self Request): string;
+Http: module {
+    init: fn(ctxt: ref Draw->Context, argv: list of string);
+
+    Request: adt {
+        request: string;
+        # headers: ref HashTable; 
+        headers: list of array of string;
+        body: array of byte;
+        str: fn(s: self Request): string;
+    };
 };
 
 Request.str(s: self Request): string
@@ -25,19 +28,19 @@ Request.str(s: self Request): string
 
 pipe := array[2] of ref Sys->FD;
 
-init()
+init(nil: ref Draw->Context, nil: list of string)
 {
     sys = load Sys Sys->PATH;
     str = load String String->PATH;
     # hash = load Hash Hash->PATH;
 
-    sample = load Machine "sample.dis";
-    sample->init();
+    # sample = load Machine "sample.dis";
+    # sample->init();
 
     if (sys->pipe(pipe) != 0)
         raise "cannot create pipe";
 
-    spawn sample->service(pipe[1]);
+    # spawn sample->service(pipe[1]);
 }
 
 service(fd : ref Sys->FD)
