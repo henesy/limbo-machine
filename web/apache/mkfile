@@ -1,0 +1,15 @@
+# apache extension tool (apxs) to use
+apxs=apxs2
+
+install:
+    $apxs -n mod_lm -ci mod_lm.c mod_lm_session.c mod_lm_tunnel.c
+    echo 'DONT FORGET TO INSTALL CONFIGS'
+    echo '* mod_lm.load'
+    echo '* mod_lm.conf'
+    # cp mod_lm.load /etc/apache2/mods-available
+    # cp mod_lm.conf /etc/apache2/mods-available
+    # ln -s /etc/apache2/mod-available/mod_lm.load /etc/apache2/mods-enabled
+    # ln -s /etc/apache2/mod-available/mod_lm.conf /etc/apache2/mods-enabled
+
+clean:
+    rm -r .libs *.la *.lo *.slo

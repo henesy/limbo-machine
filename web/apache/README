@@ -1,0 +1,40 @@
+COMMUNICATIONS
+
+Client <-> Apache
+
+Client   Apache   Inferno
+| --1--> |        |
+|        2 --3--> |
+| --4--> | --4--> |
+|        |        |
+| --5/-- |        |
+| --5--> | --6/-- |
+| <-7--- |        |
+
+1) a client issues http get request to mod_lm_session manager 
+   (http[s]://server/styx) to obtain a session (and possibly pass
+   some configuration parameters (the server name, port to connect to))
+2) session manager checks for max connections + other constraints and either
+   proceeds or rejects incomming connection
+3) session manager creates a tcp connection to inferno process (server)
+4) a client issues an http post (http[s]://server/styx/cafebabe)
+   and mounts the system
+5) if the connection between client and apache was droped then a different
+   http post with the same sessio id (cafebabe) will continue the same
+   virtual connection.  *** this can also be caused by a session timeout
+6) if the connection between apache and inferno was droped then 
+   ther is one attempt to reistablish it *** this can also be caused
+   by a session timeout
+7) a client retrieves the error code (500 CONN_DROPED) and can start
+   from beginning
+
+Module Structure
+
+mod_lm.h: common defs
+mod_lm.c: module logic
+mod_lm_session.c: session management
+mod_lm_tunnel.c: styx tunnel
+
+mkfile: make file for inferno mk(1)
+mod_lm.conf: apache2 module configuration
+mod_lm.load: apache2 module load directive

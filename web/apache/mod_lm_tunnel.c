@@ -1,14 +1,4 @@
-#include "apr_strings.h"
-#include "apr_network_io.h"
-#include "ap_config.h"
-#include "httpd.h"
-#include "http_config.h"
-#include "http_protocol.h"
-#include "http_log.h"
-#include "util_script.h"
-#include "http_main.h"
-#include "http_request.h"
-#include "mod_core.h"
+#include "mod_lm.h"
 
 #define MAX_MSG_SIZE 8192
 
@@ -21,40 +11,11 @@ static int read_msg(request_rec *r, msg_t **msg);
 static int write_msg(request_rec *r, msg_t *msg);
 static int exchange(request_rec *r, msg_t *tmsg, msg_t **rmsg);
 
-static msg_t* decode(request_rec *r, msg_t *msg);
-static msg_t* encode(request_rec *r, msg_t *msg);
-
-static int msend(request_rec *r, const char *msg, int *len);
-static int mrecv(request_rec *r, char *msg, int *len);
-
-static apr_socket_t* mconnect(request_rec *r);
-static void mclose(request_rec *r);
-
-
-static int request_handler(request_rec *r) {
+extern int tunnel(request_rec *r)
+{
     int rv;
     msg_t *rmsg;
     msg_t *tmsg;
-
-    if (strcmp(r->handler, "lm-tunnel"))
-        return DECLINED;
-
-    r->allowed |= (AP_METHOD_BIT << M_POST);
-    r->allowed |= (AP_METHOD_BIT << M_GET);
-
-    if (r->header_only)
-        return OK;
-
-    if (r->method_number == M_GET) {
-        ap_set_content_type(r, "text/html");
-        ap_rputs(DOCTYPE_HTML_4_0T, r);
-        ap_rputs("<html><body><h3>Limbo Machine Tunnel</hr></body></html>", r);
-
-        return OK;
-    }
-
-    if (r->method_number != M_POST)
-        return DECLINED;
 
     if ((rv = read_msg(r, &tmsg)) != OK)
         return rv;
@@ -68,7 +29,18 @@ static int request_handler(request_rec *r) {
     return OK;
 }
 
-static int read_msg(request_rec *r, msg_t **msg) {
+static msg_t* decode(request_rec *r, msg_t *msg);
+static msg_t* encode(request_rec *r, msg_t *msg);
+
+static int msend(request_rec *r, const char *msg, int *len);
+static int mrecv(request_rec *r, char *msg, int *len);
+
+static apr_socket_t* mconnect(request_rec *r);
+static void mclose(request_rec *r);
+
+
+static int read_msg(request_rec *r, msg_t **msg)
+{
     conn_rec *c = r->connection;
     apr_bucket_brigade *bb = apr_brigade_create(r->pool, c->bucket_alloc);
     char *dbuf = apr_palloc(r->pool, MAX_MSG_SIZE);
@@ -128,7 +100,16 @@ static int read_msg(request_rec *r, msg_t **msg) {
     return OK;
 }
 
-static int exchange(request_rec *r, msg_t *tmsg, msg_t **rmsg) {
+static int write_msg(request_rec *r, msg_t *msg)
+{
+    ap_set_content_type(r, "application/octet-stream");
+    ap_rputs(msg->data, r);
+
+    return OK;
+}
+
+static int exchange(request_rec *r, msg_t *tmsg, msg_t **rmsg)
+{
     char *data;
     char szbuf[4];
     int msgsz = 4;
@@ -166,14 +147,8 @@ static int exchange(request_rec *r, msg_t *tmsg, msg_t **rmsg) {
     return OK;
 }
 
-static int write_msg(request_rec *r, msg_t *msg) {
-    ap_set_content_type(r, "application/octet-stream");
-    ap_rputs(msg->data, r);
-
-    return OK;
-}
-
-static int msend(request_rec *r, const char *msg, int *len) {
+static int msend(request_rec *r, const char *msg, int *len)
+{
     apr_status_t rv;
     apr_socket_t *s;
    
@@ -190,7 +165,8 @@ static int msend(request_rec *r, const char *msg, int *len) {
     return OK;
 }
 
-static int mrecv(request_rec *r, char *msg, int *len) {
+static int mrecv(request_rec *r, char *msg, int *len)
+{
     apr_status_t rv;
     apr_socket_t *s;
 
@@ -210,7 +186,8 @@ static int mrecv(request_rec *r, char *msg, int *len) {
 static apr_socket_t *s = NULL;
 static apr_sockaddr_t *addr = NULL;
 
-static apr_socket_t* mconnect(request_rec *r) {
+static apr_socket_t* mconnect(request_rec *r)
+{
     apr_status_t rv;
     process_rec *p = r->connection->base_server->process;
 
@@ -254,7 +231,8 @@ static apr_socket_t* mconnect(request_rec *r) {
 
 // TODO: free apr_sockaddr_t *addr and apr_socket_t *s
 // they use per process memory pool
-static void mclose(request_rec *r) {
+static void mclose(request_rec *r)
+{
     apr_status_t rv;
     if (s != NULL && (rv = apr_socket_close(s)) != APR_SUCCESS)
         ap_log_rerror(APLOG_MARK, APLOG_ERR, rv, r, "socket close failed");
@@ -265,7 +243,8 @@ static void mclose(request_rec *r) {
 #define d(ch) (((ch) < 97) ? ((ch) - 48) : ((ch) - 87))
 #define e(ch) (((ch) < 10) ? ((ch) + 48) : ((ch) + 87))
 
-static msg_t* decode(request_rec *r, msg_t *msg) {
+static msg_t* decode(request_rec *r, msg_t *msg)
+{
     msg_t *res = apr_pcalloc(r->pool, sizeof(msg_t));
     char *data = apr_pcalloc(r->pool, (msg->size / 2) + 1);
 
@@ -284,7 +263,8 @@ static msg_t* decode(request_rec *r, msg_t *msg) {
     return res;
 }
 
-static msg_t* encode(request_rec *r, msg_t *msg) {
+static msg_t* encode(request_rec *r, msg_t *msg)
+{
     msg_t *res = apr_pcalloc(r->pool, sizeof(msg_t));
     char *data = apr_pcalloc(r->pool, (msg->size * 2) + 1);
 
@@ -304,20 +284,3 @@ static msg_t* encode(request_rec *r, msg_t *msg) {
 
     return res;
 }
-
-
-static void register_hooks(apr_pool_t *p)
-{
-    ap_hook_handler(request_handler, NULL, NULL, APR_HOOK_MIDDLE);
-}
-
-module AP_MODULE_DECLARE_DATA lm_module =
-{
-    STANDARD20_MODULE_STUFF,
-    NULL,              /* create per-directory config structure */
-    NULL,              /* merge per-directory config structures */
-    NULL,              /* create per-server config structure */
-    NULL,              /* merge per-server config structures */
-    NULL,              /* command apr_table_t */
-    register_hooks     /* register hooks */
-};
