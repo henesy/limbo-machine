@@ -1,30 +1,69 @@
-implement Postgres;
+implement Driver;
 
 include "binary.m";
     bin: Binary;
     Msg: import bin;
-
 include "sys.m";
     sys: Sys;
+include "driver.m";
 
-include "draw.m";
+tc : chan of ref T;
+rc : chan of ref R;
+rdb : chan of ref Msg;
+wdb : chan of ref Msg;
 
-Postgres: module {
-    init: fn(ctxt: ref Draw->Context, argv: list of string);
-};
-
-# Please make sure that CS is running (; ndb/cs)
-init(nil: ref Draw->Context, nil: list of string)
+init()
 {
     sys = load Sys Sys->PATH;
     bin = load Binary "binary.dis";
 
-    (ok, conn) := sys->dial("tcp!localhost!5432", nil);
-    if (ok < 0)
-        raise "failed:dial";
+    tc = chan of ref T;
+    rc = chan of ref R;
 
-    rdb := chan of ref Msg;
-    wdb := chan of ref Msg;
+    spawn parser();
+
+    # send a simple query
+    # msg = bin->new(nil);
+    # msg.add_8(int "Q"[0]);
+    # msg.add_32(0); # length
+    # msg.add_string("select * from a;");
+    # msg.set_32(len msg.bytes - 1, 1);
+    # sys->write(fd, msg.bytes, len msg.bytes);
+    # sys->print("Sending a query...\n");
+}
+
+tchan(): chan of ref T
+{
+    return tc;
+}
+
+rchan(): chan of ref R
+{
+    return rc;
+}
+
+parser()
+{
+    for (;;) {
+        tm := <- tc;
+        pick m := tm {
+        Connect =>
+            connect(m);
+        Password =>
+        }
+    }
+}
+
+connect(m: ref T.Connect)
+{
+    (ok, conn) := sys->dial(m.addr, nil);
+    if (ok < 0) {
+        rc <- = ref R.Error("dial failed");
+        return;
+    }
+
+    rdb = chan of ref Msg;
+    wdb = chan of ref Msg;
 
     fd := sys->open(conn.dir + "/data", sys->ORDWR);
 
@@ -46,29 +85,18 @@ init(nil: ref Draw->Context, nil: list of string)
     urchan := chan of string;
     uwchan := chan of string;
 
-    # user interaction
-    # connect message
     msg := bin->new(nil);
-    msg.add_32(0); # length of a message, change it
+    msg.add_32(0); # length of a message
     msg.add_16(3); # major protocol version
     msg.add_16(0); # minor protocol version
     msg.add_string("user");
-    msg.add_string("ostap");
+    msg.add_string(m.user);
     msg.add_string("database");
-    msg.add_string("ostap");
+    msg.add_string(m.db);
     msg.add_8(0);
-    msg.set_32(35, 0); # adjust the message size field
+    msg.set_32(len msg.bytes, 0);
 
     wdb <-= msg;
-
-    # send a simple query
-    # msg = bin->new(nil);
-    # msg.add_8(int "Q"[0]);
-    # msg.add_32(0); # length
-    # msg.add_string("select * from a;");
-    # msg.set_32(len msg.bytes - 1, 1);
-    # sys->write(fd, msg.bytes, len msg.bytes);
-    # sys->print("Sending a query...\n");
 }
 
 write(db: chan of ref Msg, fd: ref Sys->FD)
